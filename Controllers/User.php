@@ -8,12 +8,11 @@ class User extends Controller {
     
     public function __construct()
     {
-        
+        $this->test();
     }
 
-    public function testModel()
+    public function test()
     {
-        $this->model = $this->model('User');
-       
+        $this->model('User');       
     }
 }

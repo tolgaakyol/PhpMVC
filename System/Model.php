@@ -212,3 +212,77 @@ class Model extends Database
         return $this->stmt->execute();
     }
 }
+
+// FIXME
+class SqlWhere {
+    
+    private $currentStmt;
+
+    public function __construct($column, $operator, $value, $not = null)
+    {
+        $this->currentStmt = is_null($not) ? " WHERE $column" : " WHERE NOT $column";
+        $this->operatorSelector($operator, $value);
+        return $this;
+    }
+
+    public function and($column, $operator, $value){
+        $this->currentStmt .= " AND $column";
+        $this->operatorSelector($operator, $value);
+        return $this;
+    }
+
+    public function or($column, $operator, $value)
+    {
+        $this->currentStmt .= " OR $column";
+        $this->operatorSelector($operator, $value);
+    }
+
+    public function andnot($column, $operator, $value)
+    {
+        $this->currentStmt .= " AND NOT $column";
+        $this->operatorSelector($operator, $value);
+    }
+
+    public function get()
+    {
+        return $this->currentStmt;
+    }
+
+    private function operatorSelector($operator, $value)
+    {
+        switch ($operator)
+        {
+            case '=':
+            case '>':
+            case '<':
+            case '>=':
+            case '<=':
+            case '<>':
+            case 'LIKE':
+                if (is_array($value) && count($value) > 1) { die('Only one value must be provided inside the where clause for a single condition.'); } // ERRMSG
+                $this->currentStmt .= " $operator " . $value;
+                break;
+            case 'BETWEEN':
+                if (!is_array($value) || count($value) != 2) { die('In order to use the BETWEEN operator, 2 values must be provided in an array.'); } // ERRMSG
+                $this->currentStmt .= ' BETWEEN ' . $value[0] . ' AND ' . $value[1];
+                break;
+            case 'IN':
+            case 'NOT IN':
+                if(is_array($value))
+                {
+                    $this->currentStmt .= $operator == 'IN' ? " IN (" : " NOT IN (";
+                    for ($i = 0; $i < count($value); $i++)
+                    {
+                        $this->currentStmt .= "$i, ";
+                    }
+                    $this->currentStmt = rtrim($this->currentStmt, ", ") . ")";
+                }
+                else
+                {
+                    $operator = 'IN' ? $this->currentStmt .= " IN (" : $this->currentStmt .= " NOT IN (";
+                    $this->currentStmt .= $value . ")";
+                }
+                break;
+        }
+    }
+}

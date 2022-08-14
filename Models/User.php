@@ -2,6 +2,7 @@
 
 namespace Models;
 use System\Model;
+use System\SqlWhere;
 
 class User extends Model {
     public function __construct()
@@ -12,9 +13,9 @@ class User extends Model {
 
     public function test()
     {
-        $where = $this->where('user_id');
-        $values = ['user_id' => '2'];
-        $result = $this->select('users', '*', null, null, 'user_id ASC');
+        $where = new SqlWhere("password", "=", "123123");
+        $where->and("username", "=", "tolgaakyol");
+        $result = $this->select('users', '*', $where->get(), null, 'user_id ASC');
         
         echo "<pre>";
         print_r ($result);
