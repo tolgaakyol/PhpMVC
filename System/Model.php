@@ -20,11 +20,11 @@ class Model extends Database
 
     /**
      * A method to automatically select a record from the database. Only suitable for simple requests, therefore, complex statements should be created manually.
-     * @param mixed $tables Name of the table in which the update will take place.
-     * @param mixed $columns Selected columns to fetch. Either a string or an array can be passed. To select all columns inside the table(s), simply pass '*' within a string.
-     * @param string $where Conditions for the SQL statement must be stated here. where() method of this class can be used to generate this string.
-     * @param array $values Values of the fields which were included in $where. The format should be: ['columnName' => 'value', ...]
-     * @param string $orderBy Allows the results to be sorted based on selection. Simply pass in the name of the column that the sorting will be based on, and the direction (ASC|DESC) with a whitespace in between. (e.g. "columnName ASC")
+     * @param mixed $tables Name of the table from which the record(s) will be fetched.
+     * @param mixed $columns Selected columns to look for. Either a string or an array can be passed. To select all columns inside the table(s), simply pass '*' within a string.
+     * @param string $where Conditions for the SQL statement must be stated here. where() method of this class can be used to generate this string. // FIXME
+     * @param array $values Values of the fields which were included in $where. The format should be: ['columnName' => 'value', ...] // FIXME
+     * @param string $orderBy Allows the results to be sorted based on the selection. Simply pass in the name of the column that the sorting will be based upon, and the direction (ASC|DESC), with a whitespace in between. (e.g. "columnName ASC")
      * @param bool $distinct If passed in true, duplicate records will be omitted. Default value is false.
      * @param int $fetchMode Default is PDO::FETCH_ASSOC. It can be overridden by passing the desired mode herein.
      * @return mixed Returns the selected record(s). Data type will be based on the returning value and the fetch mode.;
