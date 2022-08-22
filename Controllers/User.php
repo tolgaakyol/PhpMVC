@@ -1,18 +1,19 @@
 <?php
 
 namespace Controllers;
+
 use System\Controller;
 
-class User extends Controller {
-    private $model;
+class User extends Controller {    
+    private \Models\User $model;
     
     public function __construct()
     {
-        $this->test();
+        $this->model = $this->model('User');
     }
 
-    public function test()
+    public function home()
     {
-        $this->model('User');       
+        $this->model->test(); // TEST
     }
 }

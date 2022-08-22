@@ -1,12 +1,14 @@
 <?php
 
 /**
+ * 
  * PHP MVC Framework
  *
- * Model parent class that includes simple automated SQL operations.
+ * Parent class for models that includes simple automated SQL operations.
  *
  * @author Tolga Akyol
- * 
+ * @see \Helpers\SQLWhere
+ *   
  */
 
 namespace System;
@@ -22,9 +24,9 @@ class Model extends Database
      * A method to automatically select a record from the database. Only suitable for simple requests, therefore, complex statements should be created manually.
      * @param mixed $tables Name of the table from which the record(s) will be fetched.
      * @param mixed $columns Selected columns to look for. Either a string or an array can be passed. To select all columns inside the table(s), simply pass '*' within a string.
-     * @param string $where Conditions for the SQL statement must be stated here. where() method of this class can be used to generate this string. // FIXME
-     * @param array $values Values of the fields which were included in $where. The format should be: ['columnName' => 'value', ...] // FIXME
-     * @param string $orderBy Allows the results to be sorted based on the selection. Simply pass in the name of the column that the sorting will be based upon, and the direction (ASC|DESC), with a whitespace in between. (e.g. "columnName ASC")
+     * @param string $where Conditions for the SQL statement must be stated here. Create an object of type 'SQLWhere', use its methods to crete a WHERE clause, then pass the object here using its 'stmt()' method.
+     * @param array $values An array of values to be passed to the prepared statement. Based on the statement passed in the $where parameter, an array must be passed here with the following format: array(':column_name' => 'value', ':column_name' => 'value', ...). Had an SQLWhere object created earlier, simply pass the object's 'values()' method here.
+     * @param string $orderBy Allows the results to be sorted based on the selection. Simply pass in the name of the column that the sorting will be based upon, and the direction (ASC|DESC), with a whitespace in between (e.g. "columnName ASC").
      * @param bool $distinct If passed in true, duplicate records will be omitted. Default value is false.
      * @param int $fetchMode Default is PDO::FETCH_ASSOC. It can be overridden by passing the desired mode herein.
      * @return mixed Returns the selected record(s). Data type will be based on the returning value and the fetch mode.;
@@ -39,7 +41,7 @@ class Model extends Database
         // Set tables
         if (empty($tables))
         {
-            die('Must declare at least one table name!');
+            die('Must declare at least one table name.'); // ERRMSG
         }
         else if (is_array($tables))
         {
@@ -53,7 +55,7 @@ class Model extends Database
         // Set columns
         if (empty($columns))
         {
-            die('Must declare columns to select!');
+            die("Must declare columns to select!"); // ERRMSG
         }
         else if (is_array($columns))
         {
@@ -77,7 +79,7 @@ class Model extends Database
         // Check if conditions are passed but values are not
         if (!empty($where) && empty($values))
         {
-            die('Values cannot be empty when conditions are set.');
+            die("Values cannot be empty when conditions are set."); // ERRMSG
         }
 
         // If there are any values passed, bind them to their keys
@@ -85,47 +87,12 @@ class Model extends Database
         {
             foreach($values as $key => $value)
             {
-                $this->bind(":$key", $value);
+                $this->bind($key, $value);
             }
         }
 
         $this->stmt->execute();
         return $this->stmt->fetchAll($fetchMode);
-    }
-
-    /**
-     * A method to automatically generate WHERE conditions for the SQL statement. Must be called repeatedly for each condition.
-     * @param string $column Name of the table's column for which a condition will be generated.
-     * @param string $existingStmt When called for the first time, $existingStmt must be null. Consecutive callings should include the previously returned string passed in the $existingStmt.
-     * @param string $operator Select the operator if applicaple (e.g. 'AND', 'OR', 'NOT', 'AND NOT'). Default is null;
-     * @return string Returns only the " WHERE ... " part of the statement as a string. This can be used within other methods.
-     */
-    protected function where($column, $existingStmt = null, $operator = null): string
-    {
-        if (!empty($existingStmt))
-        {
-            $currentStmt = $existingStmt;
-
-            switch ($operator)
-            {
-                case 'AND':
-                    $currentStmt .= ' AND ' . "$column=:$column";
-                    break;
-                case 'OR':
-                    $currentStmt .= ' OR ' . "$column=:$column";
-                    break;
-                case 'AND NOT':
-                    $currentStmt .= ' AND NOT ' . "$column=:$column";
-                    break;                    
-            }
-        }
-        else
-        {
-            $currentStmt = $operator == 'NOT' ? ' WHERE NOT ' : ' WHERE ';
-            $currentStmt .= "$column=:$column";
-        }
-
-        return $currentStmt;
     }
 
     /**
@@ -210,79 +177,5 @@ class Model extends Database
         }
 
         return $this->stmt->execute();
-    }
-}
-
-// FIXME
-class SqlWhere {
-    
-    private $currentStmt;
-
-    public function __construct($column, $operator, $value, $not = null)
-    {
-        $this->currentStmt = is_null($not) ? " WHERE $column" : " WHERE NOT $column";
-        $this->operatorSelector($operator, $value);
-        return $this;
-    }
-
-    public function and($column, $operator, $value){
-        $this->currentStmt .= " AND $column";
-        $this->operatorSelector($operator, $value);
-        return $this;
-    }
-
-    public function or($column, $operator, $value)
-    {
-        $this->currentStmt .= " OR $column";
-        $this->operatorSelector($operator, $value);
-    }
-
-    public function andnot($column, $operator, $value)
-    {
-        $this->currentStmt .= " AND NOT $column";
-        $this->operatorSelector($operator, $value);
-    }
-
-    public function get()
-    {
-        return $this->currentStmt;
-    }
-
-    private function operatorSelector($operator, $value)
-    {
-        switch ($operator)
-        {
-            case '=':
-            case '>':
-            case '<':
-            case '>=':
-            case '<=':
-            case '<>':
-            case 'LIKE':
-                if (is_array($value) && count($value) > 1) { die('Only one value must be provided inside the where clause for a single condition.'); } // ERRMSG
-                $this->currentStmt .= " $operator " . $value;
-                break;
-            case 'BETWEEN':
-                if (!is_array($value) || count($value) != 2) { die('In order to use the BETWEEN operator, 2 values must be provided in an array.'); } // ERRMSG
-                $this->currentStmt .= ' BETWEEN ' . $value[0] . ' AND ' . $value[1];
-                break;
-            case 'IN':
-            case 'NOT IN':
-                if(is_array($value))
-                {
-                    $this->currentStmt .= $operator == 'IN' ? " IN (" : " NOT IN (";
-                    for ($i = 0; $i < count($value); $i++)
-                    {
-                        $this->currentStmt .= "$i, ";
-                    }
-                    $this->currentStmt = rtrim($this->currentStmt, ", ") . ")";
-                }
-                else
-                {
-                    $operator = 'IN' ? $this->currentStmt .= " IN (" : $this->currentStmt .= " NOT IN (";
-                    $this->currentStmt .= $value . ")";
-                }
-                break;
-        }
     }
 }
