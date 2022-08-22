@@ -26,44 +26,42 @@ class Model extends Database
      * @param mixed $columns Selected columns to look for. Either a string or an array can be passed. To select all columns inside the table(s), simply pass '*' within a string.
      * @param string $where Conditions for the SQL statement must be stated here. Create an object of type 'SQLWhere', use its methods to crete a WHERE clause, then pass the object here using its 'stmt()' method.
      * @param array $values An array of values to be passed to the prepared statement. Based on the statement passed in the $where parameter, an array must be passed here with the following format: array(':column_name' => 'value', ':column_name' => 'value', ...). Had an SQLWhere object created earlier, simply pass the object's 'values()' method here.
+     * @param array $joins An array of tables to be joined. The array must be in the following format: array(array('table_name', 'join_type', 'join_condition'), array('table_name', 'join_type', 'join_condition'), ...).
      * @param string $orderBy Allows the results to be sorted based on the selection. Simply pass in the name of the column that the sorting will be based upon, and the direction (ASC|DESC), with a whitespace in between (e.g. "columnName ASC").
      * @param bool $distinct If passed in true, duplicate records will be omitted. Default value is false.
      * @param int $fetchMode Default is PDO::FETCH_ASSOC. It can be overridden by passing the desired mode herein.
      * @return mixed Returns the selected record(s). Data type will be based on the returning value and the fetch mode.;
      */
-    protected function select($tables, $columns, $where = null, $values = null, $orderBy = null, $distinct = false, $fetchMode = parent::FETCH_ASSOC)
+    protected function select($table, $columns, $where = null, $values = null, $joins = null, $orderBy = null, $distinct = false, $fetchMode = parent::FETCH_ASSOC)
     {
         $operator           = $distinct ? "SELECT DISTINCT " : "SELECT ";
+        $from               = " FROM $table";
         $selectedColumns    = '';
-        $from               = '';
         $order              = '';
+        $join               = '';
 
-        // Set tables
-        if (empty($tables))
-        {
-            die('Must declare at least one table name.'); // ERRMSG
-        }
-        else if (is_array($tables))
-        {
-            $from = ' FROM (' . implode(', ', $tables) . ')';
-        }
-        else
-        {
-            $from = " FROM $tables";
-        }
+        // Protection against empty & incorrect arguments
+        if (empty($table)) { die('Must declare at least one table name.'); } // ERRMSG
+        if (empty($columns)) { die('Must declare the columns to select!'); } // ERRMSG
+        if (!is_null($joins) && !is_array($joins)) { die("'Join' must be an array in the following format: " . "array(array('table_name', 'join_type', 'join_condition'), array('table_name', 'join_type', 'join_condition'), ...)"); } // ERRMSG
 
         // Set columns
-        if (empty($columns))
-        {
-            die("Must declare columns to select!"); // ERRMSG
-        }
-        else if (is_array($columns))
+        if (is_array($columns))
         {
             $selectedColumns = implode(', ', $columns);
         }
         else
         {
             $selectedColumns = $columns;
+        }
+
+        // Set join(s)
+        if (!is_null($joins))
+        {
+            foreach ($joins as $j)
+            {
+                $join .= " $j[1] JOIN $j[0] ON $j[2]";
+            }
         }
 
         // Set ordering
@@ -73,7 +71,7 @@ class Model extends Database
         }
 
         // Prepare and execute the sql stmt
-        $sql = $operator . $selectedColumns . $from . $where . $order;   
+        $sql = $operator . $selectedColumns . $from . $join . $where . $order;   
         $this->stmt = $this->prepare($sql);
 
         // Check if conditions are passed but values are not
