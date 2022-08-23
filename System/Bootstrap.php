@@ -42,6 +42,7 @@ class Bootstrap
         {
             call_user_func_array($handler, $this->args);
         } else {
+            Log::toFile(LogType::Critical, __METHOD__, "Unable to call method: " . $this->method);
             exit('Unable to call method: ' . $this->method); // ERRMSG
         }
     }

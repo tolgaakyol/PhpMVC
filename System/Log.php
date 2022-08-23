@@ -20,10 +20,12 @@ class Log
         $date = new DateTime("now");
 
         // File name based on the log type and the date.
-        $file = DIR_LOGS . strtolower($type->name) . "." . $date->format('Y-m') . '.log';
+        $file = DIR_LOGS . $date->format('Y-m') . '.log';
 
-        // Format the string that will be passed into the log file.
-        $log = $date->format('Y-m-d H:i:s') . " $caller " . " $message " . "\n"; // FIXME - Format $message in a way that the lines will include multiple aligned columns
+        // Format the string that will be passed into the log file.        
+        $caller = str_pad($caller, 60, " ");
+        $type = strtoupper(str_pad($type->name, 10, " "));
+        $log = $date->format('Y-m-d H:i:s') . "\t\t" . $type . " $caller " . $message . "\n"; // FIXME - Format $message in a way that the lines will include multiple aligned columns
 
         error_log($log, 3, $file);
     }
