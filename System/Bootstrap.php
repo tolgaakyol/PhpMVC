@@ -42,7 +42,7 @@ class Bootstrap
         {
             call_user_func_array($handler, $this->args);
         } else {
-            exit('Unable to call method: ' . $this->method); // TODO
+            exit('Unable to call method: ' . $this->method); // ERRMSG
         }
     }
 }

@@ -15,7 +15,7 @@ class Controller
             include $fileName;
             return new $instance;    
         } else {
-            exit('Model file not found');    // TODO - file not found
+            exit('Model file not found'); // ERRMSG
         }
     }
 
