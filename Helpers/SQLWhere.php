@@ -74,7 +74,7 @@ class SQLWhere {
     /**
      * @return string Returns the generated SQL 'WHERE' clause.
      */
-    public function stmt()
+    public function getStmt()
     {
         return $this->currentStmt;
     }
@@ -82,7 +82,7 @@ class SQLWhere {
     /**
      * @return array Returns the (prepared statement => value) pairs for the generated SQL 'WHERE' clause.
      */
-    public function values()
+    public function getValues()
     {
         return $this->currentPairs;
     }

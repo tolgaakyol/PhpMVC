@@ -15,7 +15,7 @@ class User extends Model {
     {
         $where = new SQLWhere("password", "=", "123123");
         $where->and("username", "=", "tolgaakyol")->and("username", "<>", "asd")->andnot("user_id", ">", "1");
-        $result = $this->select('users', '*', $where->stmt(), $where->values(), null, 'user_id ASC');
+        $result = $this->select('users', '*', $where->getStmt(), $where->getValues(), null, 'user_id ASC');
 
         echo "<pre>";
         print_r($result);
