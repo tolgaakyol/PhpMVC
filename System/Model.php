@@ -152,7 +152,7 @@ class Model extends Database
 
     /**
      * A method to simplify the deletion of the database records.
-     * @param string $table Name of the table in which the update will take place.
+     * @param string $table Name of the table in which the deletion will take place.
      * @param string $where Conditions for the SQL statement must be stated here. where() method of this class can be used to generate this string.
      * @param array $values Values of the fields which were included in $where. The format should be: ['columnName' => 'value', ...]
      * @param integer $limit This method allows deleting multiple records at once. It can be limited by passing the desired amount. Default is 1.

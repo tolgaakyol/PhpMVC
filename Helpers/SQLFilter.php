@@ -21,8 +21,8 @@ class SQLFilter {
     /**
      * Once the object is created using the constructor, further conditions can be applied by chaining the 'and()', 'or()' and 'andnot()' methods to the stored instance.
      * 
-     * Use stmt() to get the generated SQL 'WHERE' clause.
-     * Use values() to get the prepared statement => value pairs of the generated SQL 'WHERE' clause.
+     * Use getStmt() to get the generated SQL 'WHERE' clause.
+     * Use getValues() to get the prepared statement => value pairs of the generated SQL 'WHERE' clause.
      * 
      * Example of use:
      * $where = new SQLWhere("column_name", "=", "value");
@@ -74,7 +74,7 @@ class SQLFilter {
     /**
      * @return string Returns the generated SQL 'WHERE' clause.
      */
-    public function stmt()
+    public function getStmt()
     {
         return $this->currentStmt;
     }
@@ -82,7 +82,7 @@ class SQLFilter {
     /**
      * @return array Returns the (prepared statement => value) pairs for the generated SQL 'WHERE' clause.
      */
-    public function values()
+    public function getValues()
     {
         return $this->currentPairs;
     }
