@@ -13,7 +13,7 @@
 
 namespace Helpers;
 
-class SQLWhere {
+class SQLFilter {
     
     private string $currentStmt;
     private $currentPairs = array();

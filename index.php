@@ -11,6 +11,9 @@ foreach (glob(DIR_HELPERS . '*.php') as $fileName)
     include $fileName;
 }
 
+# Error reporting
+error_reporting(ERROR_REPORTING);
+
 # System autoloader
 spl_autoload_register(function ($class)
 {
