@@ -3,7 +3,7 @@
 /**
  * PHP MVC Framework
  *
- * Simple PDO interface to make database functions more accessible.
+ * A simple PDO interface to make database functions more accessible.
  *
  * @author Tolga Akyol
  * 

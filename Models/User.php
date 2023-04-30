@@ -3,9 +3,8 @@
 namespace Models;
 
 use System\Model;
-use System\Log;
+use System\Log, System\LogType;
 use Helpers\SQLFilter;
-use System\LogType;
 
 enum UserLevels: int {
     case Inactive = 0;
@@ -42,18 +41,16 @@ class User extends Model {
             "email"     => $email,
             "level"     => UserLevels::Inactive->value);
 
-        $this->insert("users", $content);
+        return $this->insert("users", $content);
     }
 
     public function validateCredentials($userData) {
         [$username, $password] = $userData;
 
-        if ($this->checkIfUserExists("username", $username)) {            
+        if ($this->checkIfUserExists($username)) {            
             $storedUserData = $this->getUser($username);
 
-            if (password_verify($password, $storedUserData['password'])) {
-                return true;
-            }
+            return password_verify($password, $storedUserData['password']) ? true : false;
         } else {
             return false;
         }
@@ -61,14 +58,14 @@ class User extends Model {
 
     public  function getUser($username) {
         $where = new SQLFilter("username", "=", $username);
-        $result = $this->select("users", "*", $where->stmt(), $where->values());
+        $result = $this->select("users", "*", $where->getStmt(), $where->getValues());
         return $result[0];
     }
 
     public function checkIfUserExists($username) {
-        $where = new SQLFilter($username, "=", "username");
+        $where = new SQLFilter("username", "=", $username);
 
-        $result = $this->select("users", "username", $where->stmt(), $where->values());
+        $result = $this->select("users", "username", $where->getStmt(), $where->getValues());
         if (count($result) == 1){
             return true;
         } elseif (count($result) > 1) {

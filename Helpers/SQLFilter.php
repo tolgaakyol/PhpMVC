@@ -132,7 +132,7 @@ class SQLFilter {
                 $this->currentStmt .= " $operator " . $value;
                 break;
             case 'BETWEEN':
-                if (!is_array($value) || count($value) != 2) { die("In order to use the BETWEEN operator, 2 values must be provided in an array."); } // ERRMSG
+                if (!is_array($value) || count($value) != 2) { die("In order to use the BETWEEN operator, 2 values must be provided as an array."); } // ERRMSG
                 $this->currentStmt .= ' BETWEEN ' . $value[0] . ' AND ' . $value[1];
                 break;
             case 'IN':

@@ -1,10 +1,9 @@
 {
-    "HOMEPAGE": {
-        "title": "test"
-        
-    },
+  "HOMEPAGE": {
+    "title": "test"
+  },
 
-    "NAVBAR": {
-        "item1": "Anasayfa falan"
-    }
+  "NAVBAR": {
+    "item1": "Anasayfa"
+  }
 }

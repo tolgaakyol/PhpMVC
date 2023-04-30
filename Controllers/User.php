@@ -42,7 +42,11 @@ class User extends Controller {
             die("Passwords do not match"); // ERRMSG
         }
         
-        $this->model->checkIfUserExists($username); // TEST
+        if($this->model->checkIfUserExists($username)) {
+            die("Username already exists"); // ERRMSG
+        }
+
+        $this->model->create([$username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
 
     }
 }
