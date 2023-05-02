@@ -19,8 +19,9 @@ class Controller
         }
     }
 
-    public function view($viewName)
+    public function view($viewName, $content = null)
     {
+        if (!empty($content) && is_array($content)) { extract($content); }
         include DIR_VIEWS . $viewName . '.php';
     }
 }

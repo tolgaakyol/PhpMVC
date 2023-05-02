@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use System\Controller;
+use System\Session;
 
 class User extends Controller {    
     private \Models\User $model;
@@ -12,9 +13,11 @@ class User extends Controller {
         $this->model = $this->model('User');
     }
 
-    public function home()
+    public function home() // TEST
     {
-        $this->model->test(); // TEST
+        echo "<pre>";
+        print_r($this->model->list());
+        echo "</pre>";
     }
 
     public function login() // TEST
@@ -41,12 +44,15 @@ class User extends Controller {
         if($password != $password_confirm){
             die("Passwords do not match"); // ERRMSG
         }
+
+        if($this->model->checkIfExists("email", $email)) {
+            die("A user with this e-mail address is already registered!"); // ERRMSG")
+        }
         
-        if($this->model->checkIfUserExists($username)) {
-            die("Username already exists"); // ERRMSG
+        if($this->model->checkIfExists("username", $username)) {
+            die("Username already exists");
         }
 
         $this->model->create([$username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
-
     }
 }

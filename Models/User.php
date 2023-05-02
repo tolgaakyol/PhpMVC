@@ -18,13 +18,9 @@ class User extends Model {
         parent::__construct();
     }
 
-    public function test() // TEST
+    public function list() // TEST
     {
-        $result = $this->select('users', '*');
-
-        echo "<pre>";
-        print_r($result);
-        echo "</pre>";
+        return $this->select('users', '*');        
     }
 
     public function login($userData) // TEST
@@ -47,7 +43,7 @@ class User extends Model {
     public function validateCredentials($userData) {
         [$username, $password] = $userData;
 
-        if ($this->checkIfUserExists($username)) {            
+        if ($this->checkIfExists("username", $username, true)) {            
             $storedUserData = $this->getUser($username);
 
             return password_verify($password, $storedUserData['password']) ? true : false;
@@ -62,15 +58,18 @@ class User extends Model {
         return $result[0];
     }
 
-    public function checkIfUserExists($username) {
-        $where = new SQLFilter("username", "=", $username);
+    public function checkIfExists($field, $value, $logWarning = false) {
+        $where = new SQLFilter($field, "=", $value);
 
-        $result = $this->select("users", "username", $where->getStmt(), $where->getValues());
-        if (count($result) == 1){
-            return true;
-        } elseif (count($result) > 1) {
-            Log::toFile(LogType::Critical, __METHOD__, "Duplicate username!: $username");
+        $result = $this->select("users", $field, $where->getStmt(), $where->getValues());
+
+        if ($logWarning && count($result) > 1) {
+            Log::toFile(LogType::Critical, __METHOD__, "Duplicate $field!: $value");
             return false;
+        }
+
+        if (count($result) == 1) {
+            return true;
         } else {
             return false;
         }
