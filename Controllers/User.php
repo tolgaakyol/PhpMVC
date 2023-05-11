@@ -53,6 +53,8 @@ class User extends Controller {
             die("Username already exists");
         }
 
-        $this->model->create([$username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
+        $userId = uniqid("user", true); // TODO: add line to avoid duplicates
+
+        $this->model->create([$userId, $username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
     }
 }

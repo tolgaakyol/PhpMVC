@@ -29,9 +29,10 @@ class User extends Model {
     }
 
     public function create($userData) {
-        [$username, $password, $email] = $userData;
+        [$userId, $username, $password, $email] = $userData;
 
         $content = array(
+            "user_id"   => $userId,
             "username"  => $username,
             "password"  => password_hash($password, PASSWORD_DEFAULT),
             "email"     => $email,
