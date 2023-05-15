@@ -32,7 +32,7 @@ class User extends Model {
         [$userId, $username, $password, $email] = $userData;
 
         $content = array(
-            "user_id"   => $userId,
+            "uuid"   => $userId,
             "username"  => $username,
             "password"  => password_hash($password, PASSWORD_DEFAULT),
             "email"     => $email,

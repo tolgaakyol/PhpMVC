@@ -16,7 +16,8 @@ class User extends Controller {
     public function home() // TEST
     {
         echo "<pre>";
-        print_r($this->model->list());
+        // print_r($this->model->list());
+        phpinfo();
         echo "</pre>";
     }
 
@@ -53,8 +54,12 @@ class User extends Controller {
             die("Username already exists");
         }
 
-        $userId = uniqid("user", true); // TODO: add line to avoid duplicates
+        $uuid = uniqid("u.", true); 
+        
+        while(checkIfExists("uuid", $uuid)){
+            $uuid = uniqid("u.", true);
+        }
 
-        $this->model->create([$userId, $username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
+        $this->model->create([$uuid, $username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
     }
 }
