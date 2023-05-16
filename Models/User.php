@@ -34,7 +34,7 @@ class User extends Model {
         $content = array(
             "uuid"   => $userId,
             "username"  => $username,
-            "password"  => password_hash($password, PASSWORD_DEFAULT),
+            "password"  => $password,
             "email"     => $email,
             "level"     => UserLevels::Inactive->value);
 
@@ -47,7 +47,12 @@ class User extends Model {
         if ($this->checkIfExists("username", $username, true)) {            
             $storedUserData = $this->getUser($username);
 
-            return password_verify($password, $storedUserData['password']) ? true : false;
+            if(password_verify($password, $storedUserData['password'])){
+                unset($storedUserData['password']);
+                return $storedUserData;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }

@@ -9,19 +9,17 @@ class Session
     session_start();  
   }
 
-  public function createUserSession(string $userId) {
-    // $_SESSION['username'] = $username;
-    // $_SESSION['password'] = $password;
-    $_SESSION['token'] = md5(uniqid()); // TODO: validate token
+  public static function set(string $tag, string $userId) {
+    $_SESSION[$tag] = $userId;
   }
 
-  public function checkUserSession() {
-    if(!isset($_SESSION['username']) || !isset($_SESSION['password']) || !isset($_SESSION['token']))  {
+  // TODO: Validate token?
+  public static function checkUserSession() {
+    if(!isset($_SESSION['userId']))  {
       return false;
     }
 
-    return true;
-    // TODO: validate token
+    return $_SESSION['userId'];
   }
 
   public function destroy()

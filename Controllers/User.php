@@ -7,28 +7,49 @@ use System\Session;
 
 class User extends Controller {    
     private \Models\User $model;
+    private $session;
     
     public function __construct()
     {
+        $this->session = Session::checkUserSession();
         $this->model = $this->model('User');
     }
 
     public function home() // TEST
     {
         echo "<pre>";
-        // print_r($this->model->list());
-        phpinfo();
+        print_r($this->model->list());
         echo "</pre>";
     }
 
     public function login() // TEST
-    {
-        $username = $_POST['username'];
-        $password = $_POST['password'];
+    {   
+        if($this->session != null){
+            $this->profile();
+            return;
+        }
 
-        $result = $this->model->login([$username, $password]);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-        echo $result ? "Authorized" : "Unauthorized";
+            if(!isset($_POST['username']) || !isset($_POST['password']))
+            {
+                die("Missing fields");
+            }
+
+            $username = $_POST['username'];
+            $password = $_POST['password'];
+    
+            $result = $this->model->login([$username, $password]);
+    
+            if($result){
+                Session::set("userId", $result["uuid"]);
+                $this->profile();
+            }else{
+                die("Wrong credentials");
+            }
+        } else {
+            $this->view("login");
+        }
     }
 
     public function create() // TEST
@@ -56,10 +77,17 @@ class User extends Controller {
 
         $uuid = uniqid("u.", true); 
         
-        while(checkIfExists("uuid", $uuid)){
+        while($this->model->checkIfExists("uuid", $uuid)){
             $uuid = uniqid("u.", true);
         }
 
+        $password = password_hash($password, PASSWORD_DEFAULT);
+
         $this->model->create([$uuid, $username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
+    }
+
+    public function profile() { // TEST
+        
+        $this->view("profile", ["userId" => Session::checkUserSession()]);
     }
 }
