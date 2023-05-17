@@ -8,7 +8,7 @@
 </head>
 <body>
   <pre>
-    <?php echo $_SESSION["userId"]; ?>
+    <?= $userId ?>
   </pre>
 </body>
 </html>

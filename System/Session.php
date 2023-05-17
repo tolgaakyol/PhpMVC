@@ -15,7 +15,7 @@ class Session
 
   // TODO: Validate token?
   public static function checkUserSession() {
-    if(!isset($_SESSION['userId']))  {
+    if(!isset($_SESSION['userId']) || empty($_SESSION['userId'])) {  
       return false;
     }
 

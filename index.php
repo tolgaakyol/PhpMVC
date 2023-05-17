@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 # Load config files
 foreach (glob('Config/*.php') as $fileName)
 {

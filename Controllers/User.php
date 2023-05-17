@@ -87,7 +87,6 @@ class User extends Controller {
     }
 
     public function profile() { // TEST
-        
         $this->view("profile", ["userId" => Session::checkUserSession()]);
     }
 }
