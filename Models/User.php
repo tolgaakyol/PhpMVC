@@ -32,7 +32,7 @@ class User extends Model {
         [$userId, $username, $password, $email] = $userData;
 
         $content = array(
-            "uuid"   => $userId,
+            "user_id"   => $userId,
             "username"  => $username,
             "password"  => $password,
             "email"     => $email,
@@ -58,7 +58,7 @@ class User extends Model {
         }
     }
 
-    public  function getUser($username) {
+    public function getUser($username) {
         $where = new SQLFilter("username", "=", $username);
         $result = $this->select("users", "*", $where->getStmt(), $where->getValues());
         return $result[0];
@@ -79,6 +79,10 @@ class User extends Model {
         } else {
             return false;
         }
+    }
+
+    public function storeSessionToken($sessionData){
+        return $this->insert("sessions", $sessionData);
     }
 
     public function checkPermission() {

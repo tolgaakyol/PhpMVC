@@ -75,15 +75,15 @@ class User extends Controller {
             die("Username already exists");
         }
 
-        $uuid = uniqid("u.", true); 
+        $userId = uniqid("u.", true); 
         
-        while($this->model->checkIfExists("uuid", $uuid)){
-            $uuid = uniqid("u.", true);
+        while($this->model->checkIfExists("user_id", $userId)){
+            $userId = uniqid("u.", true);
         }
 
         $password = password_hash($password, PASSWORD_DEFAULT);
 
-        $this->model->create([$uuid, $username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
+        $this->model->create([$userId, $username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
     }
 
     public function profile() { // TEST
