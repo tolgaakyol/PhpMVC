@@ -9,6 +9,7 @@
 <body>
   <pre>
     <?= $userId ?>
+    <a href="../user/logout">log out</a>
   </pre>
 </body>
 </html>

@@ -36,13 +36,21 @@ class User extends Controller {
                 die("Missing fields");
             }
 
-            $username = $_POST['username'];
-            $password = $_POST['password'];
+            $username = htmlspecialchars($_POST['username']);
+            $password = htmlspecialchars($_POST['password']);
     
             $result = $this->model->login([$username, $password]);
     
+            $token = "";
+
             if($result){
-                Session::set("userId", $result["uuid"]);
+                $sessionData = [
+                    "user_id" => $result["user_id"],
+                    "token" => $token
+                ];
+
+                Session::set($sessionData);
+
                 $this->profile();
             }else{
                 die("Wrong credentials");
@@ -88,5 +96,10 @@ class User extends Controller {
 
     public function profile() { // TEST
         $this->view("profile", ["userId" => Session::checkUserSession()]);
+    }
+
+    public function logout() { // TEST
+        Session::destroy();
+        header("Location: ../user/login");
     }
 }

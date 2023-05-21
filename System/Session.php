@@ -9,20 +9,22 @@ class Session
     session_start();  
   }
 
-  public static function set(string $tag, string $userId) {
-    $_SESSION[$tag] = $userId;
+  public static function set($sessionData) {
+    foreach($sessionData as $key => $value) {
+      $_SESSION[$key] = $value;
+    }
   }
 
   // TODO: Validate token?
   public static function checkUserSession() {
-    if(!isset($_SESSION['userId']) || empty($_SESSION['userId'])) {  
+    if(!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {  
       return false;
     }
 
-    return $_SESSION['userId'];
+    return $_SESSION['user_id'];
   }
 
-  public function destroy()
+  public static function destroy()
   {
     session_destroy();
   }
