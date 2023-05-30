@@ -40,17 +40,24 @@ class User extends Controller {
             $password = htmlspecialchars($_POST['password']);
     
             $result = $this->model->login([$username, $password]);
-    
-            $token = "";
 
             if($result){
-                $sessionData = [
-                    "user_id" => $result["user_id"],
-                    "token" => $token
-                ];
+                # Create an array of a secure token and client's IPv4
+                $sessionData = Session::createSessionToken($result['user_id']);
 
-                Session::set($sessionData);
+                # Add user level data into the array
+                $sessionData['level'] = $result['level'];
 
+                # Insert session data into the database
+                $this->model->storeSessionToken($sessionData);
+
+                # Expand session data with additional user information
+                $sessionData['username'] = $result['username'];
+
+                # Store data in the session
+                Session::set($sessionData);                
+
+                # Redirect to profile page
                 $this->profile();
             }else{
                 die("Wrong credentials");
@@ -95,10 +102,11 @@ class User extends Controller {
     }
 
     public function profile() { // TEST
-        $this->view("profile", ["userId" => Session::checkUserSession()]);
+        $this->view("profile", ["username" => Session::get('username')]);
     }
 
-    public function logout() { // TEST
+    public function logout() { // TEST)
+        $this->model->logout(Session::get('token'));
         Session::destroy();
         header("Location: ../user/login");
     }

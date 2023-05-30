@@ -115,6 +115,7 @@ class Model extends Database
         return $this->stmt->execute();
     }    
 
+    // FIXME: Documentation for "where" param is outdated.
     /**
      * A method to simplify the updating of the database records.
      * @param string $table Name of the table in which the update will take place.
@@ -150,6 +151,7 @@ class Model extends Database
         return $this->stmt->execute();
     }
 
+    // FIXME: Documentation for "where" param is outdated.
     /**
      * A method to simplify the deletion of the database records.
      * @param string $table Name of the table in which the deletion will take place.

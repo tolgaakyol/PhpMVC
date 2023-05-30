@@ -85,6 +85,11 @@ class User extends Model {
         return $this->insert("sessions", $sessionData);
     }
 
+    public function logout($token) {
+        $where = new SQLFilter("token", "=", $token);
+        $this->delete("sessions", $where->getStmt(), $where->getValues());
+    }
+
     public function checkPermission() {
 
     }

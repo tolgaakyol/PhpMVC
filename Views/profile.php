@@ -8,7 +8,8 @@
 </head>
 <body>
   <pre>
-    <?= $userId ?>
+    Logged in as: <?= $username ?>
+    <br />
     <a href="../user/logout">log out</a>
   </pre>
 </body>
