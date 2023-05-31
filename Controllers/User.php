@@ -7,26 +7,23 @@ use System\Session;
 
 class User extends Controller {    
     private \Models\User $model;
-    private $session;
     
     public function __construct()
     {
-        $this->session = Session::checkUserSession();
         $this->model = $this->model('User');
     }
 
-    public function home() // TEST
+    public function home(): void // TEST
     {
         echo "<pre>";
         print_r($this->model->list());
         echo "</pre>";
     }
 
-    public function login() // TEST
-    {   
-        if($this->session != null){
-            $this->profile();
-            return;
+    public function login(): void //
+    {
+        if (Session::checkIfAuthorized()) {
+            header("Location: ../user/profile");
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -42,23 +39,10 @@ class User extends Controller {
             $result = $this->model->login([$username, $password]);
 
             if($result){
-                # Create an array of a secure token and client's IPv4
-                $sessionData = Session::createSessionToken($result['user_id']);
-
-                # Add user level data into the array
-                $sessionData['level'] = $result['level'];
-
-                # Insert session data into the database
-                $this->model->storeSessionToken($sessionData);
-
-                # Expand session data with additional user information
-                $sessionData['username'] = $result['username'];
-
-                # Store data in the session
-                Session::set($sessionData);                
+                Session::createUserSession($result['user_id'], $result['username'], $result['level']);
 
                 # Redirect to profile page
-                $this->profile();
+                header("Location: ../user/profile");
             }else{
                 die("Wrong credentials");
             }
@@ -67,8 +51,12 @@ class User extends Controller {
         }
     }
 
-    public function create() // TEST
+    public function create(): void
     {
+        if (Session::checkIfAuthorized()) {
+            header("Location: ../user/profile");
+        }
+
         $username = $_POST['username'];
         $password = $_POST['password'];
         $password_confirm = $_POST['password_confirm'];
@@ -83,7 +71,7 @@ class User extends Controller {
         }
 
         if($this->model->checkIfExists("email", $email)) {
-            die("A user with this e-mail address is already registered!"); // ERRMSG")
+            die("A user with this e-mail address is already registered!"); // ERRMSG
         }
         
         if($this->model->checkIfExists("username", $username)) {
@@ -101,13 +89,20 @@ class User extends Controller {
         $this->model->create([$userId, $username, $password, $email]) ? print("User created") : die("Error"); // ERRMSG
     }
 
-    public function profile() { // TEST
+    public function profile(): void { // TEST
+        if (!Session::checkIfAuthorized()) {
+            $this->logout();
+        }
+
         $this->view("profile", ["username" => Session::get('username')]);
     }
 
-    public function logout() { // TEST)
-        $this->model->logout(Session::get('token'));
-        Session::destroy();
+    public function logout(): void {
+        if (!Session::checkIfAuthorized()) {
+            header("Location: ../user/login");
+        }
+
+        Session::logout();
         header("Location: ../user/login");
     }
 }

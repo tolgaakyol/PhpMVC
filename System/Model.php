@@ -21,18 +21,18 @@ class Model extends Database
     }
 
     /**
-     * A method to automatically select a record from the database. Only suitable for simple requests, therefore, complex statements should be created manually.
-     * @param mixed $tables Name of the table from which the record(s) will be fetched.
+     * A method to select record(s) from the database. Only suitable for simple requests, therefore, complex statements should be created manually.
+     * @param mixed $table Name of the table from which the record(s) will be fetched.
      * @param mixed $columns Selected columns to look for. Either a string or an array can be passed. To select all columns inside the table(s), simply pass '*' within a string.
-     * @param string $where Conditions for the SQL statement must be stated here. Create an object of type 'SQLWhere', use its methods to crete a WHERE clause, then pass the object here using its 'stmt()' method.
-     * @param array $values An array of values to be passed to the prepared statement. Based on the statement passed in the $where parameter, an array must be passed here with the following format: array(':column_name' => 'value', ':column_name' => 'value', ...). Had an SQLWhere object created earlier, simply pass the object's 'values()' method here.
-     * @param array $joins An array of tables to be joined. The array must be in the following format: array(array('table_name', 'join_type', 'join_condition'), array('table_name', 'join_type', 'join_condition'), ...).
-     * @param string $orderBy Allows the results to be sorted based on the selection. Simply pass in the name of the column that the sorting will be based upon, and the direction (ASC|DESC), with a whitespace in between (e.g. "columnName ASC").
+     * @param string|null $where Conditions for the SQL statement must be stated here. Create an object of type 'SQLWhere', use its methods to crete a WHERE clause, then pass the object here using its 'stmt()' method.
+     * @param array|null $values An array of values to be passed to the prepared statement. Based on the statement passed in the $where parameter, an array must be passed here with the following format: array(':column_name' => 'value', ':column_name' => 'value', ...). Had an SQLWhere object created earlier, simply pass the object's 'values()' method here.
+     * @param array|null $joins An array of tables to be joined. The array must be in the following format: array(array('table_name', 'join_type', 'join_condition'), array('table_name', 'join_type', 'join_condition'), ...).
+     * @param string|null $orderBy Allows the results to be sorted based on the selection. Simply pass in the name of the column that the sorting will be based upon, and the direction (ASC|DESC), with a whitespace in between (e.g. "columnName ASC").
      * @param bool $distinct If passed in true, duplicate records will be omitted. Default value is false.
      * @param int $fetchMode Default is PDO::FETCH_ASSOC. It can be overridden by passing the desired mode herein.
      * @return mixed Returns the selected record(s). Data type will be based on the returning value and the fetch mode.;
      */
-    protected function select($table, $columns, $where = null, $values = null, $joins = null, $orderBy = null, $distinct = false, $fetchMode = parent::FETCH_ASSOC)
+    public function select(mixed $table, mixed $columns, string $where = null, array $values = null, array $joins = null, string $orderBy = null, bool $distinct = false, int $fetchMode = parent::FETCH_ASSOC): mixed
     {
         $operator           = $distinct ? "SELECT DISTINCT " : "SELECT ";
         $from               = " FROM $table";
@@ -99,7 +99,7 @@ class Model extends Database
      * @param array $content An array with pairs of column names and desired values. The format should be: ['columnName' => 'newValue', ...]
      * @return bool Returns true if the operation was carried out successfully.
      */
-    protected function insert($table, $content)
+    public function insert(string $table, array $content): bool
     {
         $columns        = implode(', ', array_keys($content));
         $placeholders   = ':' . implode(', :', array_keys($content));
@@ -115,16 +115,15 @@ class Model extends Database
         return $this->stmt->execute();
     }    
 
-    // FIXME: Documentation for "where" param is outdated.
     /**
      * A method to simplify the updating of the database records.
      * @param string $table Name of the table in which the update will take place.
      * @param array $content An array with pairs of column names and desired values. The format should be: ['columnName' => 'newValue', ...]
-     * @param string $where Conditions for the SQL statement must be stated here. where() method of this class can be used to generate this string.
-     * @param array $values Values of the fields which were included in $where. The format should be: ['columnName' => 'value', ...]
+     * @param string $where Conditions for the SQL statement must be stated here. Create an object of type 'SQLWhere', use its methods to crete a WHERE clause, then pass the object here using its 'stmt()' method.
+     * @param array $values An array of values to be passed to the prepared statement. Based on the statement passed in the $where parameter, an array must be passed here with the following format: array(':column_name' => 'value', ':column_name' => 'value', ...). Had an SQLWhere object created earlier, simply pass the object's 'values()' method here.
      * @return bool Returns true if the operation was carried out successfully.
      */
-    protected function update($table, $content, $where, $values)
+    public function update(string $table, array $content, string $where, array $values): bool
     {
         // Manually the binding values of the where clause to prevent any overlaps with the $content
         foreach($values as $key => $value)
@@ -151,16 +150,15 @@ class Model extends Database
         return $this->stmt->execute();
     }
 
-    // FIXME: Documentation for "where" param is outdated.
     /**
      * A method to simplify the deletion of the database records.
      * @param string $table Name of the table in which the deletion will take place.
-     * @param string $where Conditions for the SQL statement must be stated here. where() method of this class can be used to generate this string.
-     * @param array $values Values of the fields which were included in $where. The format should be: ['columnName' => 'value', ...]
+     * @param string $where Conditions for the SQL statement must be stated here. Create an object of type 'SQLWhere', use its methods to crete a WHERE clause, then pass the object here using its 'stmt()' method.
+     * @param array $values An array of values to be passed to the prepared statement. Based on the statement passed in the $where parameter, an array must be passed here with the following format: array(':column_name' => 'value', ':column_name' => 'value', ...). Had an SQLWhere object created earlier, simply pass the object's 'values()' method here.
      * @param integer $limit This method allows deleting multiple records at once. It can be limited by passing the desired amount. Default is 1.
      * @return bool Returns true if the operation was carried out successfully.
      */
-    protected function delete($table, $where, $values, $limit = 1)
+    public function delete(string $table, string $where, array $values, int $limit = 1): bool
     {
         $sql = "DELETE FROM $table" . $where;
 

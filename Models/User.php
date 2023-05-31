@@ -28,7 +28,7 @@ class User extends Model {
         return $this->validateCredentials($userData);
     }
 
-    public function create($userData) {
+    public function create($userData): bool {
         [$userId, $username, $password, $email] = $userData;
 
         $content = array(
@@ -64,7 +64,7 @@ class User extends Model {
         return $result[0];
     }
 
-    public function checkIfExists($field, $value, $logWarning = false) {
+    public function checkIfExists($field, $value, $logWarning = false): bool {
         $where = new SQLFilter($field, "=", $value);
 
         $result = $this->select("users", $field, $where->getStmt(), $where->getValues());
@@ -79,18 +79,5 @@ class User extends Model {
         } else {
             return false;
         }
-    }
-
-    public function storeSessionToken($sessionData){
-        return $this->insert("sessions", $sessionData);
-    }
-
-    public function logout($token) {
-        $where = new SQLFilter("token", "=", $token);
-        $this->delete("sessions", $where->getStmt(), $where->getValues());
-    }
-
-    public function checkPermission() {
-
     }
 }

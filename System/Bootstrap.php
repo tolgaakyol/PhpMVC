@@ -5,9 +5,9 @@ namespace System;
 class Bootstrap
 {
 
-    private $controller = DEFAULT_CONTROLLER;
-    private $method = DEFAULT_METHOD;
-    private $args = [];
+    private string $controller = DEFAULT_CONTROLLER;
+    private string $method = DEFAULT_METHOD;
+    private array $args = [];
 
     public function __construct()
     {
@@ -15,10 +15,10 @@ class Bootstrap
         $this->initialize();    
     }
 
-    private function parseURL()
+    private function parseURL(): void
     {
         $url    = filter_input(INPUT_SERVER, 'REQUEST_URI');         
-        $url    = trim($url, '/');
+        $url    = trim((string) $url, '/');
         $url    = explode('/', $url);
 
         if (!empty($url[0])) { $this->controller = ucwords($url[0]); }
@@ -30,7 +30,7 @@ class Bootstrap
         }
     }
 
-    private function initialize()
+    private function initialize(): void
     {
         $controller = DIR_CONTROLLERS . $this->controller;
         include $controller . '.php';
