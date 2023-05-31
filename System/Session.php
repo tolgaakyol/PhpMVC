@@ -3,6 +3,7 @@
 namespace System;
 
 use Helpers\Reformatter;
+use System\Error;
 
 class Session
 {
@@ -64,19 +65,42 @@ class Session
     return true;
   }
 
-  public static function checkIfAuthorized(): bool {
+  /**
+   *
+   * @param int $level (optional) Pass in the permitted user level to restrict access to those who are below the limit.
+   * @param bool $returnError (optional) When passed in 'true', function will return the specific error as in the enumeration '\System\Error', instead of returning 'false'.
+   * @return bool|Error
+   *
+   */
+  public static function checkIfAuthorized(int $level = 0, bool $returnError= false): Error|bool {
     self::initializeModel();
 
     $session = self::checkIfUserSessionExists() ? self::$model->getStoredSession(self::get('token')) : false;
     $user = $session ? self::$model->getUser(self::get('username')) : false;
 
-    if(!$user || !$session){ return false; }
+    if(!$user || !$session){
+      return $returnError ? Error::session_Missing : false;
+    }
 
-    if(!password_verify($user['user_id'], $session['token'])) { return false; }
+    if(!password_verify($user['user_id'], $session['token'])) {
+      self::logout();
+      return $returnError ? Error::session_Corrupt : false;
+    }
 
-    if(ip2long($_SERVER['REMOTE_ADDR']) != $session['ipv4']) { return false; }
+    if(ip2long($_SERVER['REMOTE_ADDR']) != $session['ipv4']) {
+      // FIXME: IP address check is error-prone
+      self::logout();
+      return $returnError ? Error::session_NetworkChanged : false;
+    }
 
-    if($user['level'] != $session['level']) { return false; }
+    if($user['level'] != $session['level']) {
+      self::logout();
+      return $returnError ? Error::session_LevelMismatch : false;
+    }
+
+    if($level > 0 && $user['level'] < $level){
+      return $returnError ? Error::session_Unauthorized : false;
+    }
 
     return true;
   }

@@ -4,6 +4,7 @@ namespace Controllers;
 
 use System\Controller;
 use System\Session;
+use System\Error;
 
 class User extends Controller {    
     private \Models\User $model;
@@ -15,9 +16,15 @@ class User extends Controller {
 
     public function home(): void // TEST
     {
-        echo "<pre>";
-        print_r($this->model->list());
-        echo "</pre>";
+        if(Session::checkIfAuthorized(2)){
+          echo "<pre>";
+          print_r($this->model->list());
+          echo "</pre>";
+        } else if (Session::checkIfAuthorized(2, true) === Error::session_Unauthorized){
+          die("You are not allowed to view this page!");
+        } else {
+          header("Location: ../user/login");
+        }
     }
 
     public function login(): void //
