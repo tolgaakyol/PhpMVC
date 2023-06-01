@@ -10,7 +10,7 @@
   <form method="post">
     <input type="text" name="<?= LOGIN_WITH ?>" placeholder="<?= LOGIN_WITH ?>">
     <input type="password" name="password" placeholder="password">
-    <input type="checkbox" name="remember">Remember me
+    <input type="checkbox" name="remember" value="1">Remember me
     <br />
     <button type="submit">Login</button>
   </form>

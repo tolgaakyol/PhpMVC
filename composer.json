@@ -1,0 +1,15 @@
+{
+  "name": "tolgaakyol/php-mvc",
+  "description": "A very simple PHP MVC framework for personal use.",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Tolga Akyol",
+      "email": "tolgaakyol@live.com"
+    }
+  ],
+  "require": {
+    "whichbrowser/parser": "^2.1"
+  }
+}

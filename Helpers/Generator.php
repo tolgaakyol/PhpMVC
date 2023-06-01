@@ -14,7 +14,7 @@ class Generator {
 
     try {
       $token = random_bytes($length / 2);
-    } catch (\Exception) {
+    } catch (\Exception $e) {
       return false;
     }
 

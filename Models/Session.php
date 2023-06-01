@@ -6,6 +6,12 @@ use System\Model;
 use Helpers\SQLFilter;
 
 class Session extends Model {
+
+  public const session = 'sessions';
+  public const cookie = 'cookies';
+  public const name = 'username';
+  public const id = 'user_id';
+
   public function __construct()
   {
     parent::__construct();
@@ -20,17 +26,17 @@ class Session extends Model {
     return $this->insert("cookies", $cookieData);
   }
 
-  public function getUser($username) {
-    $where = new SQLFilter("username", "=", $username);
+  public function getUserByKey(string $key, string $value) {
+    $where = new SQLFilter($key, "=", $value);
     $result = $this->select("users", "*", $where->getStmt(), $where->getValues());
     return $result[0];
   }
 
-  public function getStoredSession($token) {
+  public function getStoredEntryByToken($type, $token): mixed {
     $where = new SQLFilter("token", "=", $token);
-    $result = $this->select("sessions", "*", $where->getStmt(), $where->getValues());
+    $result = $this->select($type, "*", $where->getStmt(), $where->getValues());
 
-    return $result[0];
+    return $result[0] ?? false;
   }
 
   public function logout($token): void {
