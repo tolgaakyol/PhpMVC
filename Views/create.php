@@ -8,10 +8,11 @@
 </head>
 <body>
   <form method="post">
-    <p><input type="text" name="<?= LOGIN_WITH ?>" placeholder="<?= LOGIN_WITH ?>"></p>
+    <p><input type="text" name="username" placeholder="username"></p>
+    <p><input type="text" name="email" placeholder="email"></p>
     <p><input type="password" name="password" placeholder="password"></p>
-    <p><input type="checkbox" name="remember" value="1">Remember me</p>
-    <p><button type="submit">Login</button></p>
+    <p><input type="password" name="password_confirm" placeholder="confirm password"></p>
+    <p><button type="submit">Create</button></p>
   </form>
 </body>
 </html>
