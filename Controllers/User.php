@@ -5,6 +5,7 @@ namespace Controllers;
 use System\Controller;
 use System\Session;
 use System\Error;
+use Helpers\Generator;
 
 class User extends Controller {    
     private \Models\User $model;
@@ -19,6 +20,8 @@ class User extends Controller {
         if(Session::checkIfAuthorized(2)){
           echo "<pre>";
           print_r($this->model->list());
+          echo '<br/>';
+          print_r(Session::createUserAuthCookie('a12'));
           echo "</pre>";
         } else if (Session::checkIfAuthorized(2, true) === Error::session_Unauthorized){
           die("You are not allowed to view this page!");
@@ -35,15 +38,15 @@ class User extends Controller {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            if(!isset($_POST['username']) || !isset($_POST['password']))
+            if(!isset($_POST[LOGIN_WITH]) || !isset($_POST['password']))
             {
                 die("Missing fields");
             }
 
-            $username = htmlspecialchars($_POST['username']);
+            $login = htmlspecialchars($_POST[LOGIN_WITH]);
             $password = htmlspecialchars($_POST['password']);
     
-            $result = $this->model->login([$username, $password]);
+            $result = $this->model->login([$login, $password]);
 
             if($result){
                 Session::createUserSession($result['user_id'], $result['username'], $result['level']);
@@ -64,13 +67,14 @@ class User extends Controller {
             header("Location: ../user/profile");
         }
 
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-        $password_confirm = $_POST['password_confirm'];
-        $email = $_POST['email'];
+        // TODO: Build a proper input control method
+        $username = filter_input(INPUT_POST, 'username', FILTER_SANITIZE_SPECIAL_CHARS);
+        $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_SPECIAL_CHARS);
+        $password_confirm = filter_input(INPUT_POST, 'password_confirm', FILTER_SANITIZE_SPECIAL_CHARS);
+        $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
 
-        if(!isset($username) || !isset($password_confirm) || !isset($password) || !isset($email)){
-            die("Missing fields"); // ERRMSG
+        if(!$username || !$password_confirm || !$password || !$email) {
+            die("Please fill in all required fields with valid information!"); // ERRMSG
         }
 
         if($password != $password_confirm){
@@ -78,6 +82,9 @@ class User extends Controller {
         }
 
         if($this->model->checkIfExists("email", $email)) {
+            if(empty($email)) {
+                die('Please fill in all required fields with valid information!');
+            }
             die("A user with this e-mail address is already registered!"); // ERRMSG
         }
         

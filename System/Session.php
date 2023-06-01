@@ -2,7 +2,8 @@
 
 namespace System;
 
-use Helpers\Reformatter;
+use Cassandra\Date;
+use Helpers\Reformatter, Helpers\Generator;
 use System\Error;
 
 class Session
@@ -35,18 +36,36 @@ class Session
   }
 
   public static function createUserSession(string $userId, string $username, int $level): void {
-      self::initializeModel();
+    self::initializeModel();
 
-      $sessionData = array(
-        'token' => password_hash($userId, PASSWORD_DEFAULT),
-        'ipv4' => Reformatter::ipv4($_SERVER['REMOTE_ADDR']),
-        'level' => $level
-      );
+    $sessionData = array(
+      'token' => password_hash($userId, PASSWORD_DEFAULT),
+      'ipv4' => Reformatter::ipv4($_SERVER['REMOTE_ADDR']),
+      'level' => $level
+    );
 
-      self::$model->storeSessionToken($sessionData);
+    self::$model->storeSessionToken($sessionData);
 
-      $sessionData['username'] = $username;
-      self::set($sessionData);
+    $sessionData['username'] = $username;
+    self::set($sessionData);
+  }
+
+  public static function createUserAuthCookie(string $userId): array {
+    $now = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Istanbul'));
+    $lifespan = \DateInterval::createFromDateString('15 days');
+    $expire = $now->add($lifespan);
+
+    $cookieData = array(
+      'user_id' => $userId,
+      'token' => Generator::randomToken(50),
+      'expires_at' => $expire->format('YmdHis'),
+      'ipv4' => Reformatter::ipv4($_SERVER['REMOTE_ADDR']),
+      'device' => $_SERVER['HTTP_USER_AGENT'],
+      'os' => '',
+      'browser' => ''
+    );
+
+    return $cookieData;
   }
 
   public static function checkIfUserSessionExists(): bool {

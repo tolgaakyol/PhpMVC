@@ -12,7 +12,12 @@ class Session extends Model {
   }
 
   public function storeSessionToken($sessionData): bool {
+    // FIXME: Entries that are no longer of use are likely to pile up in the database
     return $this->insert("sessions", $sessionData);
+  }
+
+  public function storeAuthCookie($cookieData): bool{
+    return $this->insert("cookies", $cookieData);
   }
 
   public function getUser($username) {

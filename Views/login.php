@@ -8,7 +8,7 @@
 </head>
 <body>
   <form method="post">
-    <input type="text" name="username" placeholder="username">
+    <input type="text" name="<?= LOGIN_WITH ?>" placeholder="<?= LOGIN_WITH ?>">
     <input type="password" name="password" placeholder="password">
     <input type="checkbox" name="remember">Remember me
     <br />

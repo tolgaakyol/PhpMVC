@@ -42,10 +42,10 @@ class User extends Model {
     }
 
     public function validateCredentials($userData) {
-        [$username, $password] = $userData;
+        [$login, $password] = $userData;
 
-        if ($this->checkIfExists("username", $username, true)) {            
-            $storedUserData = $this->getUser($username);
+        if ($this->checkIfExists(LOGIN_WITH, $login, true)) {
+            $storedUserData = $this->getUser($login);
 
             if(password_verify($password, $storedUserData['password'])){
                 unset($storedUserData['password']);
@@ -58,8 +58,8 @@ class User extends Model {
         }
     }
 
-    public function getUser($username) {
-        $where = new SQLFilter("username", "=", $username);
+    public function getUser($login) {
+        $where = new SQLFilter(LOGIN_WITH, "=", $login);
         $result = $this->select("users", "*", $where->getStmt(), $where->getValues());
         return $result[0];
     }
