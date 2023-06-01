@@ -39,8 +39,13 @@ class Session extends Model {
     return $result[0] ?? false;
   }
 
-  public function logout($token): void {
+  public function logout($token, string|false $username = false): void {
     $where = new SQLFilter("token", "=", $token);
-    $this->delete("sessions", $where->getStmt(), $where->getValues());
+
+    if ($username) {
+      $where->or('username', '=', $username);
+    }
+
+    $this->delete("sessions", $where->getStmt(), $where->getValues(), 0);
   }
 }

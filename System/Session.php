@@ -43,14 +43,13 @@ class Session
     $user = self::$model->getUserByKey(self::$model::id, $userId);
 
     $sessionData = array(
+        'username' => $user['username'],
         'token' => password_hash($userId, PASSWORD_DEFAULT),
         'ipv4' => Reformatter::ipv4($_SERVER['REMOTE_ADDR']),
         'level' => $user['level']
     );
 
     self::$model->storeSessionToken($sessionData);
-
-    $sessionData['username'] = $user['username'];
     self::set($sessionData);
   }
 
@@ -201,7 +200,7 @@ class Session
   {
     self::initializeModel();
     self::unsetCookie('auth');
-    self::$model->logout(self::get('token'));
+    self::$model->logout(self::get('token'), self::get('username'));
     self::destroy();
   }
 
