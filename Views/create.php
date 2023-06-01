@@ -13,6 +13,7 @@
     <p><input type="password" name="password" placeholder="password"></p>
     <p><input type="password" name="password_confirm" placeholder="confirm password"></p>
     <p><button type="submit">Create</button></p>
+    <a href="/user/login/">Log In</a>
   </form>
 </body>
 </html>

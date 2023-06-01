@@ -20,7 +20,7 @@ class User extends Controller
 
   public function home(): void // TEST
   {
-    if (Session::checkIfAuthorized(2)) {
+    if (Session::checkIfAuthorized(1)) {
       echo "<pre>";
       print_r($this->model->list());
       echo '<br/>';
@@ -119,7 +119,7 @@ class User extends Controller
       }
 
       if(REQUIRE_EMAIL_ACTIVATION) {
-        $result = $this->generateNonce($userId, 1, NonceUseCase::Activation->value);
+        $result = $this->generateNonce($userId, 7, NonceUseCase::Activation->value);
       }
 
       if(REQUIRE_EMAIL_ACTIVATION && !$result) {
@@ -152,6 +152,31 @@ class User extends Controller
     header("Location: ../user/login");
   }
 
+  public function activate($token = ''): void {
+    if(empty($token)) {
+      die('Requires activation token');
+    }
+
+    $nonce = $this->model->getNonce($token, NonceUseCase::Activation->value);
+
+    if(!$nonce) { die('Invalid token!'); }
+
+    try {
+      $now = new \DateTime('now', new \DateTimeZone('Europe/Istanbul'));
+      $now = $now->format('YmdHis');
+    } catch (\Exception $e) {
+      die('Unable to activate user!');
+    }
+
+    if((int) $now > (int) $nonce['expires_at']) { die('Token expired!'); }
+
+    $result = $this->model->activateUser($nonce['user_id']);
+
+    if(!$result) { die('Unable to activate user!'); }
+
+    print('User has been activated successfully!');
+  }
+
   /**
    *
    * @param string $userId Pass in the $userId for which the token is generated.
@@ -160,7 +185,7 @@ class User extends Controller
    * @return bool|Error
    *
    */
-  public function generateNonce(string $userId, int $lifespan, int|null $useCase = null): bool|Error
+  private function generateNonce(string $userId, int $lifespan = 1, int|null $useCase = null): bool|Error
   {
     $token = Generator::randomToken(50);
     while ($this->model->checkIfExists('token', $token, false, 'nonces')) {

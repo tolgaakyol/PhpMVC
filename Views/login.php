@@ -11,7 +11,8 @@
     <p><input type="text" name="<?= LOGIN_WITH ?>" placeholder="<?= LOGIN_WITH ?>"></p>
     <p><input type="password" name="password" placeholder="password"></p>
     <p><input type="checkbox" name="remember" value="1">Remember me</p>
-    <p><button type="submit">Login</button></p>
+    <p><button type="submit">Log In</button></p>
+    <a href="/user/create/">Register</a>
   </form>
 </body>
 </html>

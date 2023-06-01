@@ -20,25 +20,6 @@ class User extends Model
 
   public function login($userData) // TEST
   {
-    return $this->validateCredentials($userData);
-  }
-
-  public function create($userData): bool
-  {
-    [$userId, $username, $password, $email, $level] = $userData;
-
-    $content = array(
-        "user_id" => $userId,
-        "username" => $username,
-        "password" => $password,
-        "email" => $email,
-        "level" => $level);
-
-    return $this->insert("users", $content);
-  }
-
-  public function validateCredentials($userData)
-  {
     [$login, $password] = $userData;
 
     if ($this->checkIfExists(LOGIN_WITH, $login, true)) {
@@ -53,6 +34,20 @@ class User extends Model
     } else {
       return false;
     }
+  }
+
+  public function create($userData): bool
+  {
+    [$userId, $username, $password, $email, $level] = $userData;
+
+    $content = array(
+        "user_id" => $userId,
+        "username" => $username,
+        "password" => $password,
+        "email" => $email,
+        "level" => $level);
+
+    return $this->insert("users", $content);
   }
 
   public function getUser(string $login)
@@ -83,5 +78,28 @@ class User extends Model
 
   public function storeNonce($content): bool {
     return $this->insert('nonces', $content);
+  }
+
+  public function getNonce($token, $useCase) {
+    $where = new SQLFilter('token', '=', $token);
+    $where->and('use_case', '=', $useCase);
+
+    $result = $this->select('nonces', '*', $where->getStmt(), $where->getValues());
+
+    if(!$result) { return false; }
+
+    return $result[0];
+  }
+
+  public function activateUser($userId): bool {
+    $where = new SQLFilter('user_id', '=', $userId);
+    $result = $this->update('users', ['level' => '1'], $where->getStmt(), $where->getValues());
+
+    if($result) {
+      $where->and('use_case', '=', \NonceUseCase::Activation->value);
+      $result = $this->delete('nonces', $where->getStmt(), $where->getValues());
+    }
+
+    return $result;
   }
 }

@@ -139,7 +139,7 @@ class Session
       return $returnError ? Error::session_NetworkChanged : false;
     }
 
-    if ($user['level'] != $session['level']) {
+    if (ROLE_CHANGE_REQ_LOGIN && $user['level'] != $session['level']) {
       self::logout();
       return $returnError ? Error::session_LevelMismatch : false;
     }
