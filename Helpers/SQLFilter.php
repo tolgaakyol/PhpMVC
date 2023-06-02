@@ -16,7 +16,7 @@ namespace Helpers;
 class SQLFilter {
     
     private string $currentStmt;
-    private $currentPairs = array();
+    private array $currentPairs = array();
 
     /**
      * Once the object is created using the constructor, further conditions can be applied by chaining the 'and()', 'or()' and 'andnot()' methods to the stored instance.
@@ -34,8 +34,7 @@ class SQLFilter {
      * @param bool $not If true, the generated statement will begin with 'WHERE NOT' instead of 'WHERE'.
      *
      */
-    public function __construct($column, $operator, $value, $not = false)
-    {
+    public function __construct(string $column, string $operator, mixed $value, bool $not = false) {
         $this->currentStmt = $not ? " WHERE NOT $column" : " WHERE $column";
         $this->operatorSelector($operator, ":$column");
         $this->currentPairs[$column] = $value;
@@ -45,7 +44,7 @@ class SQLFilter {
     /**
      * Usage is identical to the constructor, except that the 'not' parameter is not applicable.
      */
-    public function and($column, $operator, $value){
+    public function and($column, $operator, $value): static {
         $this->createConditionalStatement(0, $column, $operator, $value);
 
         return $this;
@@ -54,8 +53,7 @@ class SQLFilter {
     /**
      * Usage is identical to the constructor, except that the 'not' parameter is not applicable.
      */
-    public function or($column, $operator, $value)
-    {
+    public function or($column, $operator, $value): static {
         $this->createConditionalStatement(1, $column, $operator, $value);
 
         return $this;
@@ -64,8 +62,7 @@ class SQLFilter {
     /**
      * Usage is identical to the constructor, except that the 'not' parameter is not applicable.
      */
-    public function andnot($column, $operator, $value)
-    {
+    public function andnot($column, $operator, $value): static {
         $this->createConditionalStatement(2, $column, $operator, $value);
 
         return $this;
@@ -74,21 +71,18 @@ class SQLFilter {
     /**
      * @return string Returns the generated SQL 'WHERE' clause.
      */
-    public function getStmt()
-    {
+    public function getStmt(): string {
         return $this->currentStmt;
     }
 
     /**
      * @return array Returns the (prepared statement => value) pairs for the generated SQL 'WHERE' clause.
      */
-    public function getValues()
-    {
+    public function getValues(): array {
         return $this->currentPairs;
     }
 
-    private function createConditionalStatement($condition, $column, $operator, $value)
-    {
+    private function createConditionalStatement($condition, $column, $operator, $value): void {
         if (count(array_keys($this->currentPairs)) >= 10)
         {
             die("Maximum number of conditions reached."); // ERRMSG
@@ -113,11 +107,9 @@ class SQLFilter {
         $this->operatorSelector($operator, ":$column");
 
         $this->currentPairs[$column] = $value;
-
-        return $this;
     }
 
-    private function operatorSelector($operator, $value)
+    private function operatorSelector($operator, $value): void
     {
         switch ($operator)
         {
@@ -158,8 +150,7 @@ class SQLFilter {
         }
     }
 
-    private function avoidDuplicateColumns($column)
-    {
+    private function avoidDuplicateColumns($column) {
         if(array_key_exists($column, $this->currentPairs)){
             $suffix = rand(0,100);
 

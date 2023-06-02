@@ -121,7 +121,7 @@ class User extends Controller
       }
 
       if(REQUIRE_EMAIL_ACTIVATION) {
-        $result = $this->generateToken($userId, '7D', TokenUseCase::Activation->value);
+        $result = $this->generateToken($userId, TokenUseCase::Activation->value, '7D');
       }
 
       if(REQUIRE_EMAIL_ACTIVATION && !$result) {
@@ -175,7 +175,7 @@ class User extends Controller
       $userId = $this->model->getUserIdByKey('email', $email);
 
       if($userId) {
-        $token = $this->generateToken($userId, 'T6H', TokenUseCase::ResetPassword->value, true);
+        $token = $this->generateToken($userId, TokenUseCase::ResetPassword->value, 'T6H', true);
         // TODO: Send an email that includes the link: "domain.com/user/recover/update/$token"
         print('Password recovery link has been sent to your e-mail address: ' . $token);
       } else {
@@ -235,21 +235,22 @@ class User extends Controller
       $this->model->destroyToken($token['token']);
       die('Token expired!'); // ERRMSG
     }
-
     return $token;
   }
 
   /**
    *
    * @param string $userId Pass in the $userId for whom the token will be generated.
+   * @param int $useCase Pass in a TokenUseCase->value (activation & reset password etc.).
    * @param string $lifespan (optional) Pass in the desired lifespan of the token as 1D (for 1 day), 2M (for 2 months) etc. Default lifespan is 1 day.
-   * @param int|null $useCase (optional) Pass in a TokenUseCase->value (activation & reset password etc.), only for debug purposes.
    * @param bool $returnToken (optional) While true, the function will return the generated token as a string if the operation is successful.
    * @return bool|string|Error
    *
    */
-  private function generateToken(string $userId, string $lifespan = '1D', int|null $useCase = null, bool $returnToken = false): bool|string|Error
+  private function generateToken(string $userId, int $useCase, string $lifespan = '1D', bool $returnToken = false): bool|string|Error
   {
+    $this->model->avoidDuplicateToken($userId, $useCase);
+
     $token = Generator::randomToken(50);
     while ($this->model->checkIfExists('token', $token, false, 'tokens')) {
       $token = Generator::randomToken(50);
@@ -266,10 +267,9 @@ class User extends Controller
     $content = array(
       'user_id' => $userId,
       'token' => $token,
-      'expires_at' => $expiresAt
+      'expires_at' => $expiresAt,
+      'use_case' => $useCase
     );
-
-    if(!is_null($useCase)) { $content['use_case'] = $useCase; }
 
     $result = $this->model->storeToken($content);
 

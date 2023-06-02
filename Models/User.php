@@ -111,6 +111,13 @@ class User extends Model
     return $result ? $result[0] : false;
   }
 
+  public function avoidDuplicateToken(string $userId, int $useCase): void {
+    $where = new SQLFilter('user_id', '=', $userId);
+    $where->and('use_case', '=', $useCase);
+
+    $this->delete('tokens', $where->getStmt(), $where->getValues(), 0);
+  }
+
   public function destroyToken(string $token): bool {
     $where = new SQLFilter('token', '=', $token);
 
