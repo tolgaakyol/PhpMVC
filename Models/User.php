@@ -2,6 +2,7 @@
 
 namespace Models;
 
+use TokenUseCase;
 use System\Model;
 use System\Log, System\LogType;
 use Helpers\SQLFilter;
@@ -18,15 +19,14 @@ class User extends Model
     return $this->select('users', '*');
   }
 
-  public function login($userData) // TEST
-  {
+  public function login($userData): array|false {
     [$login, $password] = $userData;
 
     if ($this->checkIfExists(LOGIN_WITH, $login, true)) {
-      $storedUserData = $this->getUser($login);
+      $storedUserData = $this->getUserByKey(LOGIN_WITH, $login);
 
       if (password_verify($password, $storedUserData['password'])) {
-        unset($storedUserData['password']);
+        if(isset($storedUserData['password'])) { unset($storedUserData['password']); }
         return $storedUserData;
       } else {
         return false;
@@ -36,8 +36,7 @@ class User extends Model
     }
   }
 
-  public function create($userData): bool
-  {
+  public function create($userData): bool {
     [$userId, $username, $password, $email, $level] = $userData;
 
     $content = array(
@@ -50,16 +49,22 @@ class User extends Model
     return $this->insert("users", $content);
   }
 
-  public function getUser(string $login)
-  {
+  public function getUserByKey($key, $value): array|false {
     // FIXME: Might be error-prone if $result returns empty
-    $where = new SQLFilter(LOGIN_WITH, "=", $login);
+    $where = new SQLFilter($key, "=", $value);
     $result = $this->select("users", "*", $where->getStmt(), $where->getValues());
-    return $result[0];
+    return $result ? $result[0] : false;
   }
 
-  public function checkIfExists(string $field, string $value, bool $logWarning = false, string $table = 'users'): bool
-  {
+  public function getUserIdByKey($key, $value): string|false {
+    $where = new SQLFilter($key, '=', $value);
+
+    $result = $this->select('users', 'user_id', $where->getStmt(), $where->getValues());
+
+    return $result ? $result[0]['user_id'] : false;
+  }
+
+  public function checkIfExists(string $field, string $value, bool $logWarning = false, string $table = 'users'): bool {
     $where = new SQLFilter($field, "=", $value);
 
     $result = $this->select($table, $field, $where->getStmt(), $where->getValues());
@@ -76,30 +81,39 @@ class User extends Model
     }
   }
 
-  public function storeNonce($content): bool {
-    return $this->insert('nonces', $content);
-  }
-
-  public function getNonce($token, $useCase) {
-    $where = new SQLFilter('token', '=', $token);
-    $where->and('use_case', '=', $useCase);
-
-    $result = $this->select('nonces', '*', $where->getStmt(), $where->getValues());
-
-    if(!$result) { return false; }
-
-    return $result[0];
-  }
-
   public function activateUser($userId): bool {
     $where = new SQLFilter('user_id', '=', $userId);
     $result = $this->update('users', ['level' => '1'], $where->getStmt(), $where->getValues());
 
     if($result) {
-      $where->and('use_case', '=', \NonceUseCase::Activation->value);
-      $result = $this->delete('nonces', $where->getStmt(), $where->getValues());
+      $where->and('use_case', '=', TokenUseCase::Activation->value);
+      $result = $this->delete('tokens', $where->getStmt(), $where->getValues());
     }
 
     return $result;
+  }
+
+  public function updatePassword(string $userId, string $password): bool {
+    $where = new SQLFilter('user_id', '=', $userId);
+    return $this->update('users', ['password' => $password], $where->getStmt(), $where->getValues());
+  }
+
+  public function storeToken($content): bool {
+    return $this->insert('tokens', $content);
+  }
+
+  public function getToken($token, $useCase) {
+    $where = new SQLFilter('token', '=', $token);
+    $where->and('use_case', '=', $useCase);
+
+    $result = $this->select('tokens', '*', $where->getStmt(), $where->getValues());
+
+    return $result ? $result[0] : false;
+  }
+
+  public function destroyToken(string $token): bool {
+    $where = new SQLFilter('token', '=', $token);
+
+    return $this->delete('tokens', $where->getStmt(), $where->getValues());
   }
 }

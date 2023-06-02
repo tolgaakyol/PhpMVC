@@ -165,6 +165,7 @@ class Session
         $now = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Istanbul'));
         $now = $now->format('YmdHis');
       } catch (\Exception $e) {
+        Log::toFile(LogType::Error, __METHOD__, 'Unable to capture current timestamp: ' . $e->getMessage());
         return false;
       }
 

@@ -12,6 +12,7 @@
     <p><input type="password" name="password" placeholder="password"></p>
     <p><input type="checkbox" name="remember" value="1">Remember me</p>
     <p><button type="submit">Log In</button></p>
+    <a href="/user/recover/">Forgot Password</a>
     <a href="/user/create/">Register</a>
   </form>
 </body>

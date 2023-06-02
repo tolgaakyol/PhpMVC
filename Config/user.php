@@ -6,7 +6,7 @@ enum UserLevels: int {
   case Admin = 2;
 }
 
-enum NonceUseCase: int {
+enum TokenUseCase: int {
   case Activation = 1;
   case ResetPassword = 2;
 }
