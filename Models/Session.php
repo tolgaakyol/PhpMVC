@@ -70,10 +70,16 @@ class Session extends Model {
     }
   }
 
-  public function destroyUserSession(string $userId, int $limit = 1): bool {
+  public function destroyUserSession(string $userId): void {
     $where = new SQLFilter('user_id', '=', $userId);
+    $result = $this->select('sessions', 'session_id', $where->getStmt(), $where->getValues(), null, 'created_at');
+    unset($where);
 
-    return $this->delete('sessions', $where->getStmt(), $where->getValues(), $limit, 'created_at');
+    if(!empty($result)) {
+      $where = new SQLFilter('session_id', '=', $result[0]['session_id']);
+      $this->delete('sessions', $where->getStmt(), $where->getValues());
+      $this->delete('cookies', $where->getStmt(), $where->getValues());
+    }
   }
 
   public function logout(string|false $userId = false): void {
