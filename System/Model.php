@@ -157,12 +157,22 @@ class Model extends Database
      * @param string $table Name of the table in which the deletion will take place.
      * @param string $where Conditions for the SQL statement must be stated here. Create an object of type 'SQLWhere', use its methods to crete a WHERE clause, then pass the object here using its 'stmt()' method.
      * @param array $values An array of values to be passed to the prepared statement. Based on the statement passed in the $where parameter, an array must be passed here with the following format: array(':column_name' => 'value', ':column_name' => 'value', ...). Had an SQLWhere object created earlier, simply pass the object's 'values()' method here.
-     * @param integer $limit This method allows deleting multiple records at once. It can be limited by passing the desired amount. Default is 1.
+     * @param integer $limit (optional) This method allows deleting multiple records at once. It can be limited by passing the desired amount. Default is 1.
+     * @param string|false $orderBy (optional) Pass in the column name by which the records should be ordered.
+     * @param bool $desc (optional) While true, records will be ordered as descending. Requires $orderBy to be passed in.
      * @return bool Returns true if the operation was carried out successfully.
      */
-    protected function delete(string $table, string $where, array $values, int $limit = 1): bool
+    protected function delete(string $table, string $where, array $values, int $limit = 1, string|false $orderBy = false, bool $desc = false): bool
     {
         $sql = "DELETE FROM $table" . $where;
+
+        if($orderBy) {
+          $sql .= " ORDER BY " . $orderBy;
+
+          if($desc) {
+            $sql .= " DESC";
+          }
+        }
 
         if ($limit > 0)
         {

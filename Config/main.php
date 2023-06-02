@@ -12,6 +12,7 @@ const LOGIN_WITH = 'username';
 const HTTPS_ENABLED = false;
 const REQUIRE_EMAIL_ACTIVATION = true;
 const ROLE_CHANGE_REQ_LOGIN = false;
+const MULTI_SESSION_LIMIT = 2;
 
 # Timezone
 date_default_timezone_set("Etc/GMT-3");

@@ -7,8 +7,8 @@ use Helpers\SQLFilter;
 
 class Session extends Model {
 
-  public const session = 'sessions';
-  public const cookie = 'cookies';
+  public const session = 'session';
+  public const cookie = 'cookie';
   public const name = 'username';
   public const id = 'user_id';
 
@@ -18,7 +18,13 @@ class Session extends Model {
   }
 
   public function storeSessionToken($sessionData): bool {
-    // FIXME: Entries that are no longer of use are likely to pile up in the database
+    $where = new SQLFilter('session_id', '=', $sessionData['session_id']);
+    $where->and('user_id', '=', $sessionData['user_id']);
+
+    if(count($this->select('sessions', 'session_id', $where->getStmt(), $where->getValues())) > 0) {
+      return true;
+    }
+
     return $this->insert("sessions", $sessionData);
   }
 
@@ -32,20 +38,52 @@ class Session extends Model {
     return $result[0];
   }
 
-  public function getStoredEntryByToken($type, $token): mixed {
-    $where = new SQLFilter("token", "=", $token);
-    $result = $this->select($type, "*", $where->getStmt(), $where->getValues());
+  public function getStoredEntry(string $type, string $value): mixed {
+    switch ($type) {
+      case self::session:
+        $table = 'sessions';
+        $key = 'session_id';
+        break;
+      case self::cookie:
+        $table = 'cookies';
+        $key = 'secret';
+        break;
+      default:
+        die('Unable to handle request!'); // ERRMSG
+    }
+
+    $where = new SQLFilter($key, "=", $value);
+    $result = $this->select($table, "*", $where->getStmt(), $where->getValues());
 
     return $result[0] ?? false;
   }
 
-  public function logout($token, string|false $username = false): void {
-    $where = new SQLFilter("token", "=", $token);
+  public function countUserSessions(string $userId): int {
+    $where = new SQLFilter('user_id', '=', $userId);
 
-    if ($username) {
-      $where->or('username', '=', $username);
+    $result = $this->select('sessions', 'user_id', $where->getStmt(), $where->getValues());
+
+    if($result) {
+      return count($result);
+    } else {
+      return 0;
+    }
+  }
+
+  public function destroyUserSession(string $userId, int $limit = 1): bool {
+    $where = new SQLFilter('user_id', '=', $userId);
+
+    return $this->delete('sessions', $where->getStmt(), $where->getValues(), $limit, 'created_at');
+  }
+
+  public function logout(string|false $userId = false): void {
+    $where = new SQLFilter("session_id", "=", session_id());
+
+    if ($userId) {
+      $where->or('user_id', '=', $userId);
     }
 
-    $this->delete("sessions", $where->getStmt(), $where->getValues(), 0);
+    $this->delete('sessions', $where->getStmt(), $where->getValues(), 0);
+    $this->delete('cookies', $where->getStmt(), $where->getValues(), 0);
   }
 }

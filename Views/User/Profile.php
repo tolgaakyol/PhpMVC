@@ -8,8 +8,11 @@
 </head>
 <body>
   <pre>
-    Logged in as: <?= $username ?>
+    Logged in as: <?php if(isset($username)) {
+      echo $username;
+    } ?>
     <br />
+    <?= 'Session ID: ' . session_id() ?>
     <a href="../user/logout">log out</a>
   </pre>
 </body>

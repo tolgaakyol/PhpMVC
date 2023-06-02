@@ -21,7 +21,9 @@ class User extends Controller
   public function __construct()
   {
     $this->model = $this->model('User');
-    Session::validateCookie();
+    if(!Session::checkIfAuthorized()) {
+      Session::validateCookie();
+    }
   }
 
   public function home(): void // TEST

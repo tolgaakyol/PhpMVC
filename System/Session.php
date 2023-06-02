@@ -36,21 +36,47 @@ class Session
     return false;
   }
 
-  public static function createUserSession(string $userId): void
+  public static function createUserSession(string $userId, bool $regenSessionId = true, string|null $forcedSessionId = null): void
   {
+    if(MULTI_SESSION_LIMIT > 0) {
+      $count = self::$model->countUserSessions($userId);
+
+      if($count >= MULTI_SESSION_LIMIT) {
+        self::$model->destroyUserSession($userId);
+      }
+    }
+
+    if($regenSessionId) {
+      if(!is_null($forcedSessionId)) {
+        die('Invalid operation!'); // ERRMSG
+      }
+
+      self::destroy();
+      session_regenerate_id();
+      session_start();
+    }
+
+    if(!$regenSessionId && !is_null($forcedSessionId)) {
+      self::destroy();
+      session_id($forcedSessionId);
+      session_start();
+    }
+
     self::initializeModel();
 
     $user = self::$model->getUserByKey(self::$model::id, $userId);
 
     $sessionData = array(
+        'user_id' => $userId,
         'username' => $user['username'],
-        'token' => password_hash($userId, PASSWORD_DEFAULT),
         'ipv4' => Reformatter::ipv4($_SERVER['REMOTE_ADDR']),
         'level' => $user['level']
     );
 
-    self::$model->storeSessionToken($sessionData);
     self::set($sessionData);
+    unset($sessionData['username']);
+    $sessionData['session_id'] = session_id();
+    self::$model->storeSessionToken($sessionData);
   }
 
   public static function createUserAuthCookie(string $userId): bool
@@ -77,7 +103,8 @@ class Session
 
     $dbData = array(
         'user_id' => $userId,
-        'token' => $token,
+        'session_id' => session_id(),
+        'secret' => $token,
         'expires_at' => $expiresAtDb,
         'ipv4' => Reformatter::ipv4($_SERVER['REMOTE_ADDR']),
         'device' => $userAgent->device->type,
@@ -95,19 +122,11 @@ class Session
 
   public static function checkIfUserSessionExists(): bool
   {
-    if (empty($_SESSION['token'])) {
+    if (empty($_SESSION['user_id']) || empty($_SESSION['username']) || empty($_SESSION['ipv4']) || empty($_SESSION['level'])) {
       return false;
+    } else {
+      return true;
     }
-
-    if (empty($_SESSION['username'])) {
-      return false;
-    }
-
-    if (empty($_SESSION['ipv4'])) {
-      return false;
-    }
-
-    return true;
   }
 
   /**
@@ -121,16 +140,11 @@ class Session
   {
     self::initializeModel();
 
-    $session = self::checkIfUserSessionExists() ? self::$model->getStoredEntryByToken(self::$model::session, self::get('token')) : false;
-    $user = $session ? self::$model->getUserByKey(self::$model::name, self::get('username')) : false;
+    $session = self::checkIfUserSessionExists() ? self::$model->getStoredEntry(self::$model::session, session_id()) : false;
+    $user = $session ? self::$model->getUserByKey(self::$model::id, $session['user_id']) : false;
 
     if (!$user || !$session) {
       return $returnError ? Error::session_Missing : false;
-    }
-
-    if (!password_verify($user['user_id'], $session['token'])) {
-      self::logout();
-      return $returnError ? Error::session_Corrupt : false;
     }
 
     if (ip2long($_SERVER['REMOTE_ADDR']) != $session['ipv4']) {
@@ -155,7 +169,7 @@ class Session
     self::initializeModel();
 
     if(isset($_COOKIE['auth'])) {
-      $dbEntry = self::$model->getStoredEntryByToken(self::$model::cookie, htmlspecialchars($_COOKIE['auth']));
+      $dbEntry = self::$model->getStoredEntry(self::$model::cookie, htmlspecialchars($_COOKIE['auth']));
 
       if(!$dbEntry) {
         return false;
@@ -186,7 +200,7 @@ class Session
         return false;
       }
 
-      self::createUserSession($dbEntry['user_id']);
+      self::createUserSession($dbEntry['user_id'], false, $dbEntry['session_id']);
       return true;
     } else {
       return false;
@@ -201,8 +215,9 @@ class Session
   {
     self::initializeModel();
     self::unsetCookie('auth');
-    self::$model->logout(self::get('token'), self::get('username'));
+    self::$model->logout();
     self::destroy();
+    $_SESSION = [];
   }
 
   public static function destroy(): void
