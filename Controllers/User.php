@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
 use Helpers\Generator;
+use Helpers\InputFilter;
 use TokenUseCase;
 use System\Controller;
 use System\Session;
@@ -45,12 +46,26 @@ class User extends Controller
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-      if (!isset($_POST[LOGIN_WITH]) || !isset($_POST['password'])) {
-        die("Missing fields"); // ERRMSG
+      $filter = new InputFilter();
+
+      $filter   ->post(LOGIN_WITH)
+                ->required()
+
+                ->post('password')
+                ->required()
+                ->alphanumeric()
+
+                ->post('remember')
+                ->length(0,1);
+
+      if($filter->getErrors()) {
+        $this->view('User/Login', ['errors' => $filter->getErrors()]);
+        return;
       }
 
-      $login = htmlspecialchars($_POST[LOGIN_WITH]);
-      $password = htmlspecialchars($_POST['password']);
+      $login = $filter->getValues()[LOGIN_WITH];
+      $password = $filter->getValues()['password'];
+      $remember = $filter->getValues()['remember'];
 
       $result = $this->model->login([$login, $password]);
 
@@ -60,7 +75,7 @@ class User extends Controller
 
       Session::createUserSession($result['user_id']);
 
-      if (htmlspecialchars($_POST['remember']) == 1) {
+      if ($remember == 1) {
         Session::createUserAuthCookie($result['user_id']);
       }
 
@@ -79,28 +94,37 @@ class User extends Controller
     }
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-      // TODO: Build a proper input control method
-      $username = filter_input(INPUT_POST, 'username', FILTER_SANITIZE_SPECIAL_CHARS);
-      $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_SPECIAL_CHARS);
-      $password_confirm = filter_input(INPUT_POST, 'password_confirm', FILTER_SANITIZE_SPECIAL_CHARS);
-      $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+      $filter = new InputFilter();
+      $filter ->post('username')
+              ->required()
+              ->lettersOnly()
+              ->length(USERNAME_LENGTH_MIN, USERNAME_LENGTH_MAX)
 
-      if (strlen($username) > 30 || strlen($password) > 30) {
-        die("Max length for username and password is 30!"); // ERRMSG
+              ->post('email')
+              ->required()
+              ->email()
+
+              ->post('password')
+              ->required()
+              ->length(PASSWORD_LENGTH_MIN, PASSWORD_LENGTH_MAX)
+              ->alphanumeric()
+
+              ->post('password_confirm')
+              ->required()
+              ->length(PASSWORD_LENGTH_MIN, PASSWORD_LENGTH_MAX)
+              ->alphanumeric()
+              ->equalTo('password');
+
+      if($filter->getErrors()) {
+        $this->view('User/Create', ['errors' => $filter->getErrors()]);
+        return;
       }
 
-      if (!$username || !$password_confirm || !$password || !$email || strlen($email) > 255) {
-        die("Please fill in all required fields with valid information!"); // ERRMSG
-      }
-
-      if ($password != $password_confirm) {
-        die("Passwords do not match"); // ERRMSG
-      }
+      $username = $filter->getValues()['username'];
+      $email = $filter->getValues()['email'];
+      $password = $filter->getValues()['password'];
 
       if ($this->model->checkIfExists("email", $email)) {
-        if (empty($email)) {
-          die('Please fill in all required fields with valid information!'); // ERRMSG
-        }
         die("A user with this e-mail address is already registered!"); // ERRMSG
       }
 

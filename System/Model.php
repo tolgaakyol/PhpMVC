@@ -4,7 +4,7 @@
  * 
  * PHP MVC Framework
  *
- * Parent class for models that includes simple automated SQL operations.
+ * Parent class for models that includes simple automated CRUD operations.
  *
  * @author Tolga Akyol
  * @see \Helpers\SQLWhere

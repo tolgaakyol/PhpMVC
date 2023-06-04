@@ -4,7 +4,7 @@
  * 
  * PHP MVC Framework
  *
- * A helper class that includes methods to simplify the generation of SQL 'WHERE' clauses.
+ * A helper class that includes methods to simplify the generation of SQL 'WHERE' conditions.
  *
  * @author Tolga Akyol
  * @see \System\Model

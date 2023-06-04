@@ -10,6 +10,7 @@
     }
   ],
   "require": {
-    "whichbrowser/parser": "^2.1"
+    "whichbrowser/parser": "^2.1",
+    "ext-ctype": "*"
   }
 }

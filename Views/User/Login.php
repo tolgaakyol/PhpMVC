@@ -9,7 +9,13 @@
 <body>
   <form method="post">
     <p><input type="text" name="<?= LOGIN_WITH ?>" placeholder="<?= LOGIN_WITH ?>"></p>
+    <?php
+    \Helpers\InputFilter::printErrors($errors ?? null, 'username');
+    ?>
     <p><input type="password" name="password" placeholder="password"></p>
+    <?php
+    \Helpers\InputFilter::printErrors($errors ?? null, 'password');
+    ?>
     <p><input type="checkbox" name="remember" value="1">Remember me</p>
     <p><button type="submit">Log In</button></p>
     <a href="/user/recover/">Forgot Password</a>
