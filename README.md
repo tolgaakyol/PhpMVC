@@ -4,7 +4,7 @@ A simple PHP MVC framework for personal use.
 
 ### About Me
 
-I am far from a professional developer, yet, I have been excited about coding since childhood. I am only working on this framework for my excitement & hoping to use it while working on some personal projects as a prototype.
+I am far from a professional developer, yet, I have been excited about coding since childhood. I am only working on this framework for my own excitement & hoping to use it as a backend prototype while working on some personal projects.
 
 ### Plans
 
