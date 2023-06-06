@@ -11,6 +11,7 @@
     }
   ],
   "autoload": {
+    "files": ["index.php"],
     "psr-4": {
       "TolgaAkyol\\PhpMVC\\": "/"
     }
