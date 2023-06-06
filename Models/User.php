@@ -1,16 +1,15 @@
 <?php
 
-namespace Models;
+namespace Tolgaakyol\PhpMVC\Models;
 
-use TokenUseCase;
-use System\Model;
-use System\Log, System\LogType;
-use Helpers\SQLFilter;
+use Tolgaakyol\PhpMVC\Config as Config;
+use Tolgaakyol\PhpMVC\Config\TokenUseCase;
+use Tolgaakyol\PhpMVC\System\{Model, Log, LogType};
+use Tolgaakyol\PhpMVC\Helpers\SQLFilter;
 
 class User extends Model
 {
-  public function __construct()
-  {
+  public function __construct() {
     parent::__construct();
   }
 
@@ -22,8 +21,8 @@ class User extends Model
   public function login($userData): array|false {
     [$login, $password] = $userData;
 
-    if ($this->checkIfExists(LOGIN_WITH, $login, true)) {
-      $storedUserData = $this->getUserByKey(LOGIN_WITH, $login);
+    if ($this->checkIfExists(Config\LOGIN_WITH, $login, true)) {
+      $storedUserData = $this->getUserByKey(Config\LOGIN_WITH, $login);
 
       if (password_verify($password, $storedUserData['password'])) {
         if(isset($storedUserData['password'])) { unset($storedUserData['password']); }

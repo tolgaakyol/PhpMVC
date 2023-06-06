@@ -2,7 +2,7 @@
 
 // TODO: definition & info
 
-namespace Helpers;
+namespace Tolgaakyol\PhpMVC\Helpers;
 
 class Generator {
   public static function randomToken(int $length = 20): string {

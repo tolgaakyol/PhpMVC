@@ -1,8 +1,9 @@
 <?php
 
-namespace System;
+namespace Tolgaakyol\PhpMVC\System;
 
 use DateTime;
+use Tolgaakyol\PhpMVC\Config as Config;
 
 enum LogType
 {
@@ -25,7 +26,7 @@ class Log
         $date = new DateTime("now");
 
         // File name based on the log type and the date.
-        $file = DIR_LOGS . $date->format('Y-m') . '.log';
+        $file = Config\DIR_LOGS . $date->format('Y-m') . '.log';
 
         // Clamp the string inputs
         $caller = substr($caller, 0, 60);

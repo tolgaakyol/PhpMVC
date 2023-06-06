@@ -1,34 +1,37 @@
 <?php
 
-namespace System;
+namespace Tolgaakyol\PhpMVC\System;
 
-use Helpers\Reformatter, Helpers\Generator;
+use DateInterval;
+use DateTimeImmutable;
+use DateTimeZone;
+use Exception;
+use Tolgaakyol\PhpMVC\Helpers\{Reformatter, Generator};
+use Tolgaakyol\PhpMVC\Models\Session as Model;
+use Tolgaakyol\PhpMVC\Config as Config;
+use WhichBrowser\Parser;
 
 class Session
 {
-  private static \Models\Session $model;
+  private static Model $model;
 
-  public function __construct()
-  {
+  public function __construct() {
     session_start();
   }
 
-  public static function initializeModel(): void
-  {
+  public static function initializeModel(): void {
     if (empty(self::$model)) {
-      self::$model = new \Models\Session();
+      self::$model = new Model();
     }
   }
 
-  public static function set(array $sessionData): void
-  {
+  public static function set(array $sessionData): void {
     foreach ($sessionData as $key => $value) {
       $_SESSION[$key] = $value;
     }
   }
 
-  public static function get($key)
-  {
+  public static function get($key) {
     if (isset($_SESSION[$key])) {
       return $_SESSION[$key];
     }
@@ -36,12 +39,11 @@ class Session
     return false;
   }
 
-  public static function createUserSession(string $userId, bool $regenSessionId = true, string|null $forcedSessionId = null): void
-  {
-    if(MULTI_SESSION_LIMIT > 0) {
+  public static function createUserSession(string $userId, bool $regenSessionId = true, string|null $forcedSessionId = null): void {
+    if(Config\MULTI_SESSION_LIMIT > 0) {
       $count = self::$model->countUserSessions($userId);
 
-      if($count >= MULTI_SESSION_LIMIT) {
+      if($count >= Config\MULTI_SESSION_LIMIT) {
         self::$model->destroyUserSession($userId);
       }
     }
@@ -51,9 +53,7 @@ class Session
         die('Invalid operation!'); // ERRMSG
       }
 
-      self::destroy();
       session_regenerate_id();
-      session_start();
     }
 
     if(!$regenSessionId && !is_null($forcedSessionId)) {
@@ -79,25 +79,21 @@ class Session
     self::$model->storeSessionToken($sessionData);
   }
 
-  public static function createUserAuthCookie(string $userId): bool
-  {
+  public static function createUserAuthCookie(string $userId): bool {
     // FIXME: Refactor expire date variables.
 
-    $expiresAtDb = '';
-    $expiresAtCookie = '';
-
     try {
-      $now = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Istanbul'));
-      $lifespan = \DateInterval::createFromDateString('15 days');
+      $now = new DateTimeImmutable('now', new DateTimeZone('Europe/Istanbul'));
+      $lifespan = DateInterval::createFromDateString('15 days');
       $expiresAt = $now->add($lifespan);
       $expiresAtDb = $expiresAt->format('YmdHis');
       $expiresAtCookie = $expiresAt->format('U');
-    } catch (\Exception $e) {
-      Log::toFile(LogType::Error, __METHOD__, 'DateTimeImmutable class is unable to capture a timestamp.');
+    } catch (Exception $e) {
+      Log::toFile(LogType::Error, __METHOD__, 'DateTimeImmutable class is unable to capture a timestamp: ' . $e->getMessage());
       return false;
     }
 
-    $userAgent = new \WhichBrowser\Parser(getallheaders());
+    $userAgent = new Parser(getallheaders());
 
     $token = Generator::randomToken(50);
 
@@ -113,16 +109,15 @@ class Session
     );
 
     if (self::$model->storeAuthCookie($dbData)) {
-      setcookie('auth', $token, $expiresAtCookie, '/', URL_ROOT, HTTPS_ENABLED, true);
+      setcookie('auth', $token, $expiresAtCookie, '/', Config\URL_ROOT, Config\HTTPS_ENABLED, true);
       return true;
     } else {
       return false;
     }
   }
 
-  public static function checkIfUserSessionExists(): bool
-  {
-    if (empty($_SESSION['user_id']) || empty($_SESSION['username']) || empty($_SESSION['ipv4']) || empty($_SESSION['level'])) {
+  public static function checkIfUserSessionExists(): bool {
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['username']) || !isset($_SESSION['ipv4']) || !isset($_SESSION['level'])) {
       return false;
     } else {
       return true;
@@ -136,8 +131,7 @@ class Session
    * @return bool|Error
    *
    */
-  public static function checkIfAuthorized(int $level = 0, bool $returnError = false): Error|bool
-  {
+  public static function checkIfAuthorized(int $level = 0, bool $returnError = false): Error|bool {
     self::initializeModel();
 
     $session = self::checkIfUserSessionExists() ? self::$model->getStoredEntry(self::$model::session, session_id()) : false;
@@ -153,7 +147,7 @@ class Session
       return $returnError ? Error::session_NetworkChanged : false;
     }
 
-    if (ROLE_CHANGE_REQ_LOGIN && $user['level'] != $session['level']) {
+    if (Config\ROLE_CHANGE_REQ_LOGIN && $user['level'] != $session['level']) {
       self::logout();
       return $returnError ? Error::session_LevelMismatch : false;
     }
@@ -176,9 +170,9 @@ class Session
       }
 
       try {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Istanbul'));
+        $now = new DateTimeImmutable('now', new DateTimeZone('Europe/Istanbul'));
         $now = $now->format('YmdHis');
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         Log::toFile(LogType::Error, __METHOD__, 'Unable to capture current timestamp: ' . $e->getMessage());
         return false;
       }
@@ -188,7 +182,7 @@ class Session
         return false;
       }
 
-      $userAgent = new \WhichBrowser\Parser(getallheaders());
+      $userAgent = new Parser(getallheaders());
 
       $userAgent = array(
           'device' => $userAgent->device->type,
@@ -208,7 +202,7 @@ class Session
   }
 
   public static function unsetCookie(string $name): void {
-    setcookie($name, '', time()-86401, "/", URL_ROOT, HTTPS_ENABLED, false);
+    setcookie($name, '', time()-86401, "/", Config\URL_ROOT, Config\HTTPS_ENABLED, false);
   }
 
   public static function logout(): void

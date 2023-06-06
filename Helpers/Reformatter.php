@@ -2,7 +2,7 @@
 
 // TODO: definition & info
 
-namespace Helpers;
+namespace Tolgaakyol\PhpMVC\Helpers;
 
 class Reformatter {
   public static function ipv4($ipv4):int {

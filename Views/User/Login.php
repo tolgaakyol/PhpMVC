@@ -1,3 +1,9 @@
+<?php
+
+use Tolgaakyol\PhpMVC\Config as Config;
+use Tolgaakyol\PhpMVC\Helpers\InputFilter;
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,13 +14,13 @@
 </head>
 <body>
   <form method="post">
-    <p><input type="text" name="<?= LOGIN_WITH ?>" placeholder="<?= LOGIN_WITH ?>"></p>
+    <p><input type="text" name="<?= Config\LOGIN_WITH ?>" placeholder="<?= Config\LOGIN_WITH ?>"></p>
     <?php
-    \Helpers\InputFilter::printErrors($errors ?? null, 'username');
+    InputFilter::printErrors($errors ?? null, 'username');
     ?>
     <p><input type="password" name="password" placeholder="password"></p>
     <?php
-    \Helpers\InputFilter::printErrors($errors ?? null, 'password');
+    InputFilter::printErrors($errors ?? null, 'password');
     ?>
     <p><input type="checkbox" name="remember" value="1">Remember me</p>
     <p><button type="submit">Log In</button></p>

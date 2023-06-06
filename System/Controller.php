@@ -1,14 +1,16 @@
 <?php
 
-namespace System;
+namespace Tolgaakyol\PhpMVC\System;
+
+use Tolgaakyol\PhpMVC\Config as Config;
 
 class Controller
 {
-    public function model($modelName)
-    {
-        $fileName = DIR_MODELS . $modelName . '.php';
-        $instance = ucwords(DIR_MODELS) . $modelName;
+    public function model($modelName):mixed {
+        $fileName = Config\DIR_MODELS . $modelName . '.php';
+        $instance = ucwords(Config\DIR_MODELS) . $modelName;
         $instance = str_replace('/', '\\', $instance);
+        $instance = Config\PACKAGE_PREFIX . $instance;
 
         if (file_exists($fileName))
         {
@@ -19,9 +21,8 @@ class Controller
         }
     }
 
-    public function view($viewName, $content = null)
-    {
+    public function view($viewName, $content = null): void {
         if (!empty($content) && is_array($content)) { extract($content); }
-        include DIR_VIEWS . $viewName . '.php';
+        include Config\DIR_VIEWS . $viewName . '.php';
     }
 }

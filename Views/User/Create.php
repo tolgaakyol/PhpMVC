@@ -1,3 +1,10 @@
+<?php
+
+use Tolgaakyol\PhpMVC\Config as Config;
+use Tolgaakyol\PhpMVC\Helpers\InputFilter;
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,19 +17,19 @@
   <form method="post">
     <p><input type="text" name="username" placeholder="username"></p>
     <?php
-    \Helpers\InputFilter::printErrors($errors ?? null, 'username');
+    InputFilter::printErrors($errors ?? null, 'username');
     ?>
     <p><input type="text" name="email" placeholder="email"></p>
     <?php
-    \Helpers\InputFilter::printErrors($errors ?? null, 'email');
+    InputFilter::printErrors($errors ?? null, 'email');
     ?>
     <p><input type="password" name="password" placeholder="password"></p>
     <?php
-    \Helpers\InputFilter::printErrors($errors ?? null, 'password');
+    InputFilter::printErrors($errors ?? null, 'password');
     ?>
     <p><input type="password" name="password_confirm" placeholder="confirm password"></p>
     <?php
-    \Helpers\InputFilter::printErrors($errors ?? null, 'password_confirm');
+    InputFilter::printErrors($errors ?? null, 'password_confirm');
     ?>
     <p><button type="submit">Create</button></p>
     <a href="/user/login/">Log In</a>

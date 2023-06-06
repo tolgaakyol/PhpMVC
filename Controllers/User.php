@@ -1,23 +1,24 @@
 <?php
 
-namespace Controllers;
+namespace Tolgaakyol\PhpMVC\Controllers;
 
 use DateInterval;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
-use Helpers\Generator;
-use Helpers\InputFilter;
-use TokenUseCase;
-use System\Controller;
-use System\Session;
-use System\Error;
-use System\Log, System\LogType;
+use Tolgaakyol\PhpMVC\{Helpers\Generator,
+    Helpers\InputFilter
+};
+use Tolgaakyol\PhpMVC\System\{Controller, Session, Error, Log, LogType};
+use Tolgaakyol\PhpMVC\Config as Config;
+use Tolgaakyol\PhpMVC\Config\TokenUseCase;
+use Tolgaakyol\PhpMVC\Models\User as Model;
 
+/** @noinspection PhpUnused */
 class User extends Controller
 {
-  private \Models\User $model;
+  private Model $model;
 
   public function __construct()
   {
@@ -45,15 +46,13 @@ class User extends Controller
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
       $filter = new InputFilter();
 
-      $filter   ->post(LOGIN_WITH)
+      $filter   ->post(Config\LOGIN_WITH)
                 ->required()
 
                 ->post('password')
                 ->required()
-                ->alphanumeric()
 
                 ->post('remember')
                 ->length(0,1);
@@ -63,7 +62,7 @@ class User extends Controller
         return;
       }
 
-      $login = $filter->getValues()[LOGIN_WITH];
+      $login = $filter->getValues()[Config\LOGIN_WITH];
       $password = $filter->getValues()['password'];
       $remember = $filter->getValues()['remember'];
 
@@ -87,6 +86,7 @@ class User extends Controller
     }
   }
 
+  /** @noinspection PhpUnused */
   public function create(): void
   {
     if (Session::checkIfAuthorized()) {
@@ -98,7 +98,7 @@ class User extends Controller
       $filter ->post('username')
               ->required()
               ->lettersOnly()
-              ->length(USERNAME_LENGTH_MIN, USERNAME_LENGTH_MAX)
+              ->length(Config\USERNAME_LENGTH_MIN, Config\USERNAME_LENGTH_MAX)
 
               ->post('email')
               ->required()
@@ -106,13 +106,11 @@ class User extends Controller
 
               ->post('password')
               ->required()
-              ->length(PASSWORD_LENGTH_MIN, PASSWORD_LENGTH_MAX)
               ->alphanumeric()
+              ->length(Config\PASSWORD_LENGTH_MIN, Config\PASSWORD_LENGTH_MAX)
 
               ->post('password_confirm')
               ->required()
-              ->length(PASSWORD_LENGTH_MIN, PASSWORD_LENGTH_MAX)
-              ->alphanumeric()
               ->equalTo('password');
 
       if($filter->getErrors()) {
@@ -146,11 +144,11 @@ class User extends Controller
         die("Error while creating the user!"); // ERRMSG
       }
 
-      if(REQUIRE_EMAIL_ACTIVATION) {
+      if(Config\REQUIRE_EMAIL_ACTIVATION) {
         $result = $this->generateToken($userId, TokenUseCase::Activation->value, '7D');
       }
 
-      if(REQUIRE_EMAIL_ACTIVATION && !$result) {
+      if(Config\REQUIRE_EMAIL_ACTIVATION && !$result) {
         die('Unable to create user activation token!'); // ERRMSG
       }
 
@@ -180,6 +178,7 @@ class User extends Controller
     header("Location: ../user/login");
   }
 
+  /** @noinspection PhpUnused */
   public function activate($token = ''): void {
     $validToken = $this->validateToken($token, TokenUseCase::Activation->value, 50);
 
@@ -190,11 +189,20 @@ class User extends Controller
     print('User has been activated successfully!');
   }
 
+  /** @noinspection PhpUnused */
   public function recover($token = ''): void {
     if($_SERVER['REQUEST_METHOD'] == 'POST' && empty($token)) {
-      $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+      $filter = new InputFilter();
+      $filter ->post('email')
+              ->required()
+              ->email();
 
-      if(!$email) { die('Please provide a valid e-mail address!'); } // ERRMSG
+      if($filter->getErrors()) {
+        $this->view('User/RequestRecovery', ['errors' => $filter->getErrors()]);
+        return;
+      }
+
+      $email = $filter->getValues()['email'];
 
       if(!$this->model->checkIfExists('email', $email)) { die('E-mail address not found!'); } // ERRMSG
 
@@ -208,16 +216,27 @@ class User extends Controller
         die('Unable to process the request.'); // ERRMSG
       }
     } else if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($token)) {
-      // FIXME: Build a proper method to filter inputs
-      $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_SPECIAL_CHARS);
-      $password_confirm = filter_input(INPUT_POST, 'password_confirm', FILTER_SANITIZE_SPECIAL_CHARS);
-
-      if(empty($password) || empty($password_confirm) || $password != $password_confirm) { die('Please type in two identical passwords'); } // ERRMSG
-
       $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
       $user = $this->model->getUserByKey('user_id', $validToken['user_id']);
 
       if(!$user) { die('Unable to retrieve user information from the server!'); } // ERRMSG
+
+      $filter = new InputFilter();
+      $filter ->post('password')
+              ->required()
+              ->alphanumeric()
+              ->length(Config\PASSWORD_LENGTH_MIN, Config\PASSWORD_LENGTH_MAX)
+
+              ->post('password_confirm')
+              ->required()
+              ->equalTo('password');
+
+      if($filter->getErrors()) {
+        $this->view('User/NewPassword', ['email' => $user['email'], 'errors' => $filter->getErrors()]);
+        return;
+      }
+
+      $password = $filter->getValues()['password'];
 
       $result = $this->model->updatePassword($validToken['user_id'], password_hash($password, PASSWORD_DEFAULT));
 

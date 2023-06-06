@@ -1,6 +1,6 @@
 <?php
 
-namespace System;
+namespace Tolgaakyol\PhpMVC\System;
 
 enum Error {
   # Session related errors

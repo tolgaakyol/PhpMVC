@@ -1,6 +1,6 @@
 *.log
 .DS_Store
+composer.lock
 /.idea
-/composer.lock
-/vendor/
-/Logs/
+/vendor
+/Logs

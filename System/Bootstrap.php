@@ -1,12 +1,14 @@
 <?php
 
-namespace System;
+namespace Tolgaakyol\PhpMVC\System;
+
+use Tolgaakyol\PhpMVC\Config as Config;
 
 class Bootstrap
 {
 
-    private string $controller = DEFAULT_CONTROLLER;
-    private string $method = DEFAULT_METHOD;
+    private string $controller = Config\DEFAULT_CONTROLLER;
+    private string $method = Config\DEFAULT_METHOD;
     private array $args = [];
 
     public function __construct()
@@ -32,9 +34,10 @@ class Bootstrap
 
     private function initialize(): void
     {
-        $controller = DIR_CONTROLLERS . $this->controller;
+        $controller = Config\DIR_CONTROLLERS . $this->controller;
         include $controller . '.php';
         $controller = str_replace('/', '\\', $controller);
+        $controller = Config\PACKAGE_PREFIX . $controller;
         $instance = new $controller;
         $handler = [$instance, $this->method];
 

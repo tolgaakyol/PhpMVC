@@ -7,11 +7,11 @@
  * Parent class for models that includes simple automated CRUD operations.
  *
  * @author Tolga Akyol
- * @see \Helpers\SQLWhere
+ * @see Tolgaakyol\PhpMVC\Helpers\SQLWhere
  *   
  */
 
-namespace System;
+namespace Tolgaakyol\PhpMVC\System;
 
 class Model extends Database
 {

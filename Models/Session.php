@@ -1,9 +1,9 @@
 <?php
 
-namespace Models;
+namespace Tolgaakyol\PhpMVC\Models;
 
-use System\Model;
-use Helpers\SQLFilter;
+use Tolgaakyol\PhpMVC\System\Model;
+use Tolgaakyol\PhpMVC\Helpers\SQLFilter;
 
 class Session extends Model {
 

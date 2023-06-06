@@ -1,12 +1,14 @@
 <?php
 
+namespace Tolgaakyol\PhpMVC\Config;
+
 # Directories
-define('DIR_CONFIG', 'Config/');
-define('DIR_SYSTEM', 'System/');
-define('DIR_CONTROLLERS', 'Controllers/');
-define('DIR_MODELS', 'Models/');
-define('DIR_VIEWS', 'Views/');
-define('DIR_HELPERS', 'Helpers/');
-define('DIR_LOGS', 'Logs/');
-define('DIR_LANG', 'Lang/');
-define('DIR_PUBLIC', 'Public/');
+const DIR_CONFIG = 'Config/';
+const DIR_SYSTEM = 'System/';
+const DIR_CONTROLLERS = 'Controllers/';
+const DIR_MODELS = 'Models/';
+const DIR_VIEWS = 'Views/';
+const DIR_HELPERS = 'Helpers/';
+const DIR_LOGS = 'Logs/';
+const DIR_LANG = 'Lang/';
+const DIR_PUBLIC = 'Public/';
