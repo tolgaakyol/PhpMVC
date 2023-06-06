@@ -9,12 +9,12 @@
  * 
  */
 
-namespace Tolgaakyol\PhpMVC\System;
+namespace TolgaAkyol\PhpMVC\System;
 
 use PDO;
 use PDOException;
 use PDOStatement;
-use Tolgaakyol\PhpMVC\Config as Config;
+use TolgaAkyol\PhpMVC\Config as Config;
 
 class Database extends PDO
 {

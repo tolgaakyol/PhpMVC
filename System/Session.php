@@ -1,14 +1,14 @@
 <?php
 
-namespace Tolgaakyol\PhpMVC\System;
+namespace TolgaAkyol\PhpMVC\System;
 
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
-use Tolgaakyol\PhpMVC\Helpers\{Reformatter, Generator};
-use Tolgaakyol\PhpMVC\Models\Session as Model;
-use Tolgaakyol\PhpMVC\Config as Config;
+use TolgaAkyol\PhpMVC\Helpers\{Reformatter, Generator};
+use TolgaAkyol\PhpMVC\Models\Session as Model;
+use TolgaAkyol\PhpMVC\Config as Config;
 use WhichBrowser\Parser;
 
 class Session

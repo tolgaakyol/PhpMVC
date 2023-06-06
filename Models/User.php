@@ -1,11 +1,11 @@
 <?php
 
-namespace Tolgaakyol\PhpMVC\Models;
+namespace TolgaAkyol\PhpMVC\Models;
 
-use Tolgaakyol\PhpMVC\Config as Config;
-use Tolgaakyol\PhpMVC\Config\TokenUseCase;
-use Tolgaakyol\PhpMVC\System\{Model, Log, LogType};
-use Tolgaakyol\PhpMVC\Helpers\SQLFilter;
+use TolgaAkyol\PhpMVC\Config as Config;
+use TolgaAkyol\PhpMVC\Config\TokenUseCase;
+use TolgaAkyol\PhpMVC\System\{Model, Log, LogType};
+use TolgaAkyol\PhpMVC\Helpers\SQLFilter;
 
 class User extends Model
 {

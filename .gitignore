@@ -1,6 +1,23 @@
+## Do not ignore:
+
+!Views/User/*
+
+!Models/User.php
+!Models/Session.php
+
+!Controllers/Home.php
+!Controllers/User.php
+
+# Ignore:
+
 *.log
 .DS_Store
 composer.lock
-/.idea
-/vendor
-/Logs
+.idea/*
+vendor/*
+
+Models/*
+Views/*
+Controllers/*
+
+

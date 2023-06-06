@@ -1,19 +1,19 @@
 <?php
 
-namespace Tolgaakyol\PhpMVC\Controllers;
+namespace TolgaAkyol\PhpMVC\Controllers;
 
 use DateInterval;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
-use Tolgaakyol\PhpMVC\{Helpers\Generator,
+use TolgaAkyol\PhpMVC\{Helpers\Generator,
     Helpers\InputFilter
 };
-use Tolgaakyol\PhpMVC\System\{Controller, Session, Error, Log, LogType};
-use Tolgaakyol\PhpMVC\Config as Config;
-use Tolgaakyol\PhpMVC\Config\TokenUseCase;
-use Tolgaakyol\PhpMVC\Models\User as Model;
+use TolgaAkyol\PhpMVC\System\{Controller, Session, Error, Log, LogType};
+use TolgaAkyol\PhpMVC\Config as Config;
+use TolgaAkyol\PhpMVC\Config\TokenUseCase;
+use TolgaAkyol\PhpMVC\Models\User as Model;
 
 /** @noinspection PhpUnused */
 class User extends Controller

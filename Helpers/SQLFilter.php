@@ -7,11 +7,11 @@
  * A helper class that includes methods to simplify the generation of SQL 'WHERE' conditions.
  *
  * @author Tolga Akyol
- * @see Tolgaakyol\PhpMVC\System\Model
+ * @see TolgaAkyol\PhpMVC\System\Model
  *   
  */
 
-namespace Tolgaakyol\PhpMVC\Helpers;
+namespace TolgaAkyol\PhpMVC\Helpers;
 
 class SQLFilter {
     

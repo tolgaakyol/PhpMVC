@@ -1,6 +1,6 @@
 <?php
 
-use Tolgaakyol\PhpMVC\Helpers\InputFilter;
+use TolgaAkyol\PhpMVC\Helpers\InputFilter;
 
 ?>
 <!DOCTYPE html>

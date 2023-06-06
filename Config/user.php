@@ -1,6 +1,6 @@
 <?php
 
-namespace Tolgaakyol\PhpMVC\Config;
+namespace TolgaAkyol\PhpMVC\Config;
 
 enum UserLevels: int {
   case Inactive = 0;

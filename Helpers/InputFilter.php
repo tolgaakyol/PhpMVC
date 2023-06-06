@@ -2,7 +2,7 @@
 
 // TODO: definition & info
 
-namespace Tolgaakyol\PhpMVC\Helpers;
+namespace TolgaAkyol\PhpMVC\Helpers;
 
 class InputFilter {
   private InputFilterField $currentField;

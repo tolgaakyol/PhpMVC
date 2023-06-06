@@ -1,14 +1,14 @@
 <?php
 
-namespace Tolgaakyol\PhpMVC\Config;
+namespace TolgaAkyol\PhpMVC\Config;
 
 # Main config
 const SITE_NAME = 'PhpMVC';
 const URL_FULL = 'http://mvc.local/';
 const URL_ROOT = 'mvc.local';
-const PACKAGE_PREFIX = 'Tolgaakyol\PhpMVC\\';
+const PACKAGE_PREFIX = 'TolgaAkyol\PhpMVC\\';
 const DEFAULT_LANGUAGE = 'en';
-const DEFAULT_CONTROLLER = 'Page';
+const DEFAULT_CONTROLLER = 'Home';
 const DEFAULT_METHOD = 'home';
 const ERROR_REPORTING = E_ALL;
 const HTTPS_ENABLED = false;

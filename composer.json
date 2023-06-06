@@ -9,6 +9,11 @@
       "email": "tolgaakyol@live.com"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "TolgaAkyol\\PhpMVC\\": "/"
+    }
+  },
   "require": {
     "whichbrowser/parser": "^2.1",
     "ext-ctype": "*",

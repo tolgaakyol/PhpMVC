@@ -1,8 +1,8 @@
 <?php
 
-namespace Tolgaakyol\PhpMVC\System;
+namespace TolgaAkyol\PhpMVC\System;
 
-use Tolgaakyol\PhpMVC\Config as Config;
+use TolgaAkyol\PhpMVC\Config as Config;
 
 class Controller
 {

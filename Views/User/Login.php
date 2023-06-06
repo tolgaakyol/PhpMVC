@@ -1,7 +1,7 @@
 <?php
 
-use Tolgaakyol\PhpMVC\Config as Config;
-use Tolgaakyol\PhpMVC\Helpers\InputFilter;
+use TolgaAkyol\PhpMVC\Config as Config;
+use TolgaAkyol\PhpMVC\Helpers\InputFilter;
 
 ?>
 <!DOCTYPE html>

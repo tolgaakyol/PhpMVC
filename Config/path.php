@@ -1,6 +1,6 @@
 <?php
 
-namespace Tolgaakyol\PhpMVC\Config;
+namespace TolgaAkyol\PhpMVC\Config;
 
 # Directories
 const DIR_CONFIG = 'Config/';

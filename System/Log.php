@@ -1,9 +1,9 @@
 <?php
 
-namespace Tolgaakyol\PhpMVC\System;
+namespace TolgaAkyol\PhpMVC\System;
 
 use DateTime;
-use Tolgaakyol\PhpMVC\Config as Config;
+use TolgaAkyol\PhpMVC\Config as Config;
 
 enum LogType
 {

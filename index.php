@@ -1,8 +1,8 @@
 <?php
 
-namespace Tolgaakyol\PhpMVC;
+namespace TolgaAkyol\PhpMVC;
 
-use Tolgaakyol\PhpMVC\Config as Config;
+use TolgaAkyol\PhpMVC\Config as Config;
 
 ini_set('session.use_strict_mode', true);
 session_start();
@@ -25,7 +25,7 @@ error_reporting(Config\ERROR_REPORTING);
 # System autoloader
 spl_autoload_register(function ($class) {
   $class = str_replace('\\', '/', $class);
-  $class = str_replace('Tolgaakyol/PhpMVC/', '', $class);
+  $class = str_replace('TolgaAkyol/PhpMVC/', '', $class);
   include_once $class . '.php';
 });
 
