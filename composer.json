@@ -1,6 +1,7 @@
 {
   "name": "tolgaakyol/php-mvc",
-  "description": "A very simple PHP MVC framework for personal use.",
+  "description": "A simple PHP MVC framework for personal use.",
+  "type": "library",
   "minimum-stability": "dev",
   "license": "MIT",
   "authors": [
