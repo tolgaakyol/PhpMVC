@@ -1,6 +1,5 @@
 <?php
 
-use TolgaAkyol\PhpMVC\Config as Config;
 use TolgaAkyol\PhpMVC\Helpers\InputFilter;
 
 ?>

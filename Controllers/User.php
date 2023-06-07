@@ -11,7 +11,6 @@ use TolgaAkyol\PhpMVC\{Helpers\Generator,
     Helpers\InputFilter
 };
 use TolgaAkyol\PhpMVC\System\{Controller, Session, Error, Log, LogType};
-use TolgaAkyol\PhpMVC\Config as Config;
 use TolgaAkyol\PhpMVC\Config\TokenUseCase;
 use TolgaAkyol\PhpMVC\Models\User as Model;
 
@@ -48,7 +47,7 @@ class User extends Controller
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $filter = new InputFilter();
 
-      $filter   ->post(Config\LOGIN_WITH)
+      $filter   ->post(LOGIN_WITH)
                 ->required()
 
                 ->post('password')
@@ -62,7 +61,7 @@ class User extends Controller
         return;
       }
 
-      $login = $filter->getValues()[Config\LOGIN_WITH];
+      $login = $filter->getValues()[LOGIN_WITH];
       $password = $filter->getValues()['password'];
       $remember = $filter->getValues()['remember'];
 
@@ -98,7 +97,7 @@ class User extends Controller
       $filter ->post('username')
               ->required()
               ->lettersOnly()
-              ->length(Config\USERNAME_LENGTH_MIN, Config\USERNAME_LENGTH_MAX)
+              ->length(USERNAME_LENGTH_MIN, USERNAME_LENGTH_MAX)
 
               ->post('email')
               ->required()
@@ -107,7 +106,7 @@ class User extends Controller
               ->post('password')
               ->required()
               ->alphanumeric()
-              ->length(Config\PASSWORD_LENGTH_MIN, Config\PASSWORD_LENGTH_MAX)
+              ->length(PASSWORD_LENGTH_MIN, PASSWORD_LENGTH_MAX)
 
               ->post('password_confirm')
               ->required()
@@ -144,11 +143,11 @@ class User extends Controller
         die("Error while creating the user!"); // ERRMSG
       }
 
-      if(Config\REQUIRE_EMAIL_ACTIVATION) {
+      if(REQUIRE_EMAIL_ACTIVATION) {
         $result = $this->generateToken($userId, TokenUseCase::Activation->value, '7D');
       }
 
-      if(Config\REQUIRE_EMAIL_ACTIVATION && !$result) {
+      if(REQUIRE_EMAIL_ACTIVATION && !$result) {
         die('Unable to create user activation token!'); // ERRMSG
       }
 
@@ -225,7 +224,7 @@ class User extends Controller
       $filter ->post('password')
               ->required()
               ->alphanumeric()
-              ->length(Config\PASSWORD_LENGTH_MIN, Config\PASSWORD_LENGTH_MAX)
+              ->length(PASSWORD_LENGTH_MIN, PASSWORD_LENGTH_MAX)
 
               ->post('password_confirm')
               ->required()

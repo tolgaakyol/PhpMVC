@@ -28,14 +28,6 @@ class Application {
     !self::$isFrameworkDev && $this->createHtaccess();
 
     # Load config files
-    foreach (glob(self::$PATH_CORE . 'Config/*.php') as $fileName) {
-      include $fileName;
-    }
-
-    foreach (glob(Config\DIR_HELPERS . '*.php') as $fileName) {
-      include $fileName;
-    }
-
     if(!self::$isFrameworkDev && self::$PATH_EXT) {
       foreach (glob( self::$PATH_EXT. 'Config/*.php') as $fileName) {
         include $fileName;
@@ -46,8 +38,16 @@ class Application {
       }
     }
 
+    foreach (glob(self::$PATH_CORE . 'Config/*.php') as $fileName) {
+      include $fileName;
+    }
+
+    foreach (glob(DIR_HELPERS . '*.php') as $fileName) {
+      include $fileName;
+    }
+
     # Error reporting
-    $errorReportingOverride && error_reporting(Config\ERROR_REPORTING);
+    $errorReportingOverride && error_reporting(ERROR_REPORTING);
 
     # System autoloader
     spl_autoload_register(function ($class) {
@@ -102,5 +102,13 @@ class Application {
     EOD;
 
     fwrite($file, $contents);
+  }
+
+  public static function getCustomConfig(): string|false {
+    if(self::$isFrameworkDev || !file_exists(self::$PATH_EXT.'Config/main.php')) {
+      return false;
+    } else {
+      return self::$PROJECT_PREFIX . 'Config\\';
+    }
   }
 }

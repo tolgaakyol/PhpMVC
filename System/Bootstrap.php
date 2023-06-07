@@ -3,12 +3,11 @@
 namespace TolgaAkyol\PhpMVC\System;
 
 use TolgaAkyol\PhpMVC\Application;
-use TolgaAkyol\PhpMVC\Config as Config;
 
 class Bootstrap
 {
-    private string $controller = Config\DEFAULT_CONTROLLER;
-    private string $method = Config\DEFAULT_METHOD;
+    private string $controller = (string) INDEX_CONTROLLER;
+    private string $method = (string) INDEX_METHOD;
     private array $args = [];
 
     public function __construct()
@@ -35,15 +34,17 @@ class Bootstrap
     private function initialize(): void
     {
 		$isCore = true;
-        $controller = Config\DIR_CONTROLLERS . $this->controller;
+        $controller = DIR_CONTROLLERS . $this->controller;
         if(file_exists(Application::$PATH_CORE . $controller . '.php')) {
           include Application::$PATH_CORE . $controller . '.php';
-        } else {
-		  $isCore = false;
+        } else if (file_exists(Application::$PATH_EXT . $controller . '.php')) {
+		      $isCore = false;
           include Application::$PATH_EXT . $controller . '.php';
+        } else {
+          die('Controller not found!');
         }
         $controller = str_replace('/', '\\', $controller);
-        $controller = $isCore ? Config\PACKAGE_PREFIX . $controller : Application::$PROJECT_PREFIX . $controller;
+        $controller = $isCore ? PACKAGE_PREFIX . $controller : Application::$PROJECT_PREFIX . $controller;
         $instance = new $controller;
         $handler = [$instance, $this->method];
 

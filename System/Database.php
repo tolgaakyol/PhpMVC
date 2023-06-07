@@ -14,17 +14,16 @@ namespace TolgaAkyol\PhpMVC\System;
 use PDO;
 use PDOException;
 use PDOStatement;
-use TolgaAkyol\PhpMVC\Config as Config;
 
 class Database extends PDO
 {
     protected PDOStatement $stmt;
 
     protected function __construct() {
-        $hostname   = Config\DB_HOST;
-        $username   = Config\DB_USER;
-        $password   = Config\DB_PASS;
-        $dbname     = Config\DB_NAME;
+        $hostname   = DB_HOST;
+        $username   = DB_USER;
+        $password   = DB_PASS;
+        $dbname     = DB_NAME;
 
         $dsn = "mysql:host=$hostname;dbname=$dbname;charset=UTF8";
 
