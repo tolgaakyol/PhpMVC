@@ -16,7 +16,7 @@ class Application {
 
     self::$isFrameworkDev = $mvcDev;
     if(!$mvcDev && $projectDir) {
-      self::$PATH_EXT = $projectDir;
+      self::$PATH_EXT = $projectDir . '\\';
     } else if(!$mvcDev && !$projectDir) {
       self::$PATH_EXT = $this->findPath('index.php', 'src');
     } else {

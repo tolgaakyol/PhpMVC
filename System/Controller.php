@@ -28,7 +28,14 @@ class Controller
     if (!empty($content) && is_array($content)) {
       extract($content);
     }
+
     $prefix = $isCore ? Application::$PATH_CORE : Application::$PATH_EXT;
-    include $prefix . Config\DIR_VIEWS . $viewName . '.php';
+    $path = $prefix . Config\DIR_VIEWS . $viewName . '.php';
+
+    if(file_exists($path)) {
+      include $prefix . Config\DIR_VIEWS . $viewName . '.php';
+    } else {
+      die('View file not found!'); // ERRMSG
+    }
   }
 }
