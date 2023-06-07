@@ -2,6 +2,7 @@
 composer.lock
 .DS_Store
 .idea
+index.php
 /vendor
 
 ###
