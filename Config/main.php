@@ -2,26 +2,65 @@
 
 namespace TolgaAkyol\PhpMVC\Config;
 
-# Main config
-const SITE_NAME = 'PhpMVC';
-const URL_FULL = 'http://mvc.local/';
-const URL_ROOT = 'mvc.local';
-const PACKAGE_PREFIX = 'TolgaAkyol\PhpMVC\\';
-const DEFAULT_LANGUAGE = 'en';
-const DEFAULT_CONTROLLER = 'Home';
-const DEFAULT_METHOD = 'home';
-const ERROR_REPORTING = E_ALL;
-const HTTPS_ENABLED = false;
+use TolgaAkyol\PhpMVC\Application;
 
-# User authentication related
-const LOGIN_WITH = 'username';
-const REQUIRE_EMAIL_ACTIVATION = true;
-const ROLE_CHANGE_REQ_LOGIN = false;
-const MULTI_SESSION_LIMIT = 2;
-const USERNAME_LENGTH_MIN = 3;
-const USERNAME_LENGTH_MAX = 20;
-const PASSWORD_LENGTH_MIN = 6;
-const PASSWORD_LENGTH_MAX = 30;
+$fieldsAllowOverride = array(
+  'SITE_NAME',
+  'URL_FULL',
+  'URL_ROOT',
+  'PACKAGE_PREFIX',
+  'INDEX_CONTROLLER',
+  'INDEX_METHOD',
+  'TIMEZONE',
+  'ERROR_REPORTING',
+  'HTTPS_ENABLED',
+  'DB_HOST',
+  'DB_NAME',
+  'DB_USER',
+  'DB_PASS',
+  'LOGIN_WITH',
+  'REQUIRE_EMAIL_ACTIVATION',
+  'ROLE_CHANGE_REQ_LOGIN',
+  'MULTI_SESSION_LIMIT',
+  'USERNAME_LENGTH_MIN',
+  'USERNAME_LENGTH_MAX',
+  'PASSWORD_LENGTH_MIN',
+  'PASSWORD_LENGTH_MAX',
+  'DIR_CONFIG',
+  'DIR_SYSTEM',
+  'DIR_CONTROLLERS',
+  'DIR_MODELS',
+  'DIR_VIEWS',
+  'DIR_HELPERS',
+  'DIR_LOGS',
+  'DIR_PUBLIC',
+);
+
+foreach($fieldsAllowOverride as $field) {
+  try {
+    define($field, constant(Application::getCustomConfig() . $field));
+  } catch (\Error $e) {
+    define($field, constant('TolgaAkyol\PhpMVC\Config\\' . $field . '_DEFAULT'));
+  }
+}
 
 # Timezone
-date_default_timezone_set("Etc/GMT-3");
+date_default_timezone_set(TIMEZONE);
+
+# User levels & authentication
+enum UserLevels: int {
+  case Inactive = 0;
+  case Standard = 1;
+  case Admin = 2;
+}
+
+enum TokenUseCase: int {
+  case Activation = 1;
+  case ResetPassword = 2;
+}
+
+if(REQUIRE_EMAIL_ACTIVATION) {
+  define('DEFAULT_USER_LEVEL', UserLevels::Inactive->value);
+} else {
+  define('DEFAULT_USER_LEVEL', UserLevels::Standard->value);
+}

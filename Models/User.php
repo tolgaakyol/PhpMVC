@@ -2,7 +2,6 @@
 
 namespace TolgaAkyol\PhpMVC\Models;
 
-use TolgaAkyol\PhpMVC\Config as Config;
 use TolgaAkyol\PhpMVC\Config\TokenUseCase;
 use TolgaAkyol\PhpMVC\System\{Model, Log, LogType};
 use TolgaAkyol\PhpMVC\Helpers\SQLFilter;
@@ -21,8 +20,8 @@ class User extends Model
   public function login($userData): array|false {
     [$login, $password] = $userData;
 
-    if ($this->checkIfExists(Config\LOGIN_WITH, $login, true)) {
-      $storedUserData = $this->getUserByKey(Config\LOGIN_WITH, $login);
+    if ($this->checkIfExists(LOGIN_WITH, $login, true)) {
+      $storedUserData = $this->getUserByKey(LOGIN_WITH, $login);
 
       if (password_verify($password, $storedUserData['password'])) {
         if(isset($storedUserData['password'])) { unset($storedUserData['password']); }

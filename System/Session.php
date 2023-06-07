@@ -40,10 +40,10 @@ class Session
   }
 
   public static function createUserSession(string $userId, bool $regenSessionId = true, string|null $forcedSessionId = null): void {
-    if(Config\MULTI_SESSION_LIMIT > 0) {
+    if(MULTI_SESSION_LIMIT > 0) {
       $count = self::$model->countUserSessions($userId);
 
-      if($count >= Config\MULTI_SESSION_LIMIT) {
+      if($count >= MULTI_SESSION_LIMIT) {
         self::$model->destroyUserSession($userId);
       }
     }
@@ -109,7 +109,7 @@ class Session
     );
 
     if (self::$model->storeAuthCookie($dbData)) {
-      setcookie('auth', $token, $expiresAtCookie, '/', Config\URL_ROOT, Config\HTTPS_ENABLED, true);
+      setcookie('auth', $token, $expiresAtCookie, '/', URL_ROOT, HTTPS_ENABLED, true);
       return true;
     } else {
       return false;
@@ -147,7 +147,7 @@ class Session
       return $returnError ? Error::session_NetworkChanged : false;
     }
 
-    if (Config\ROLE_CHANGE_REQ_LOGIN && $user['level'] != $session['level']) {
+    if (ROLE_CHANGE_REQ_LOGIN && $user['level'] != $session['level']) {
       self::logout();
       return $returnError ? Error::session_LevelMismatch : false;
     }
@@ -202,7 +202,7 @@ class Session
   }
 
   public static function unsetCookie(string $name): void {
-    setcookie($name, '', time()-86401, "/", Config\URL_ROOT, Config\HTTPS_ENABLED, false);
+    setcookie($name, '', time()-86401, "/", URL_ROOT, HTTPS_ENABLED, false);
   }
 
   public static function logout(): void

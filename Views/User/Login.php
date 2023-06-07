@@ -1,6 +1,5 @@
 <?php
 
-use TolgaAkyol\PhpMVC\Config as Config;
 use TolgaAkyol\PhpMVC\Helpers\InputFilter;
 
 ?>
@@ -14,7 +13,7 @@ use TolgaAkyol\PhpMVC\Helpers\InputFilter;
 </head>
 <body>
   <form method="post">
-    <p><input type="text" name="<?= Config\LOGIN_WITH ?>" placeholder="<?= Config\LOGIN_WITH ?>"></p>
+    <p><input type="text" name="<?= LOGIN_WITH ?>" placeholder="<?= LOGIN_WITH ?>"></p>
     <?php
     InputFilter::printErrors($errors ?? null, 'username');
     ?>
