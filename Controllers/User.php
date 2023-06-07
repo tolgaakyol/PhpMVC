@@ -22,7 +22,7 @@ class User extends Controller
 
   public function __construct()
   {
-    $this->model = $this->model('User');
+    $this->model = $this->model('User', true);
     if(!Session::checkIfAuthorized()) {
       Session::validateCookie();
     }
@@ -58,7 +58,7 @@ class User extends Controller
                 ->length(0,1);
 
       if($filter->getErrors()) {
-        $this->view('User/Login', ['errors' => $filter->getErrors()]);
+        $this->view('User/Login', ['errors' => $filter->getErrors()], true);
         return;
       }
 
@@ -82,7 +82,7 @@ class User extends Controller
       header("Location: /user/profile");
 
     } else {
-      $this->view("User/Login");
+      $this->view("User/Login", null, true);
     }
   }
 
@@ -114,7 +114,7 @@ class User extends Controller
               ->equalTo('password');
 
       if($filter->getErrors()) {
-        $this->view('User/Create', ['errors' => $filter->getErrors()]);
+        $this->view('User/Create', ['errors' => $filter->getErrors()], true);
         return;
       }
 
@@ -155,7 +155,7 @@ class User extends Controller
       print('User was created successfully!'); // TODO: Complete user creation
 
     } else {
-      $this->view("User/Create");
+      $this->view("User/Create", null, true);
     }
   }
 
@@ -165,7 +165,7 @@ class User extends Controller
       $this->logout();
     }
 
-    $this->view("User/Profile", ["username" => Session::get('username')]);
+    $this->view("User/Profile", ["username" => Session::get('username')], true);
   }
 
   public function logout(): void
@@ -198,7 +198,7 @@ class User extends Controller
               ->email();
 
       if($filter->getErrors()) {
-        $this->view('User/RequestRecovery', ['errors' => $filter->getErrors()]);
+        $this->view('User/RequestRecovery', ['errors' => $filter->getErrors()], true);
         return;
       }
 
@@ -232,7 +232,7 @@ class User extends Controller
               ->equalTo('password');
 
       if($filter->getErrors()) {
-        $this->view('User/NewPassword', ['email' => $user['email'], 'errors' => $filter->getErrors()]);
+        $this->view('User/NewPassword', ['email' => $user['email'], 'errors' => $filter->getErrors()], true);
         return;
       }
 
@@ -254,9 +254,9 @@ class User extends Controller
 
       if(!$user) { die('Unable to retrieve user information from the server!'); } // ERRMSG
 
-      $this->view('User/NewPassword', ['email' => $user['email']]);
+      $this->view('User/NewPassword', ['email' => $user['email']], true);
     } else {
-      $this->view('User/RequestRecovery');
+      $this->view('User/RequestRecovery', null, true);
     }
   }
 

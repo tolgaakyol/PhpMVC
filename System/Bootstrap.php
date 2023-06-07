@@ -2,11 +2,11 @@
 
 namespace TolgaAkyol\PhpMVC\System;
 
+use TolgaAkyol\PhpMVC\Application;
 use TolgaAkyol\PhpMVC\Config as Config;
 
 class Bootstrap
 {
-
     private string $controller = Config\DEFAULT_CONTROLLER;
     private string $method = Config\DEFAULT_METHOD;
     private array $args = [];
@@ -34,10 +34,16 @@ class Bootstrap
 
     private function initialize(): void
     {
+		$isCore = true;
         $controller = Config\DIR_CONTROLLERS . $this->controller;
-        include $controller . '.php';
+        if(file_exists(Application::$PATH_CORE . $controller . '.php')) {
+          include Application::$PATH_CORE . $controller . '.php';
+        } else {
+		  $isCore = false;
+          include Application::$PATH_EXT . $controller . '.php';
+        }
         $controller = str_replace('/', '\\', $controller);
-        $controller = Config\PACKAGE_PREFIX . $controller;
+        $controller = $isCore ? Config\PACKAGE_PREFIX . $controller : Application::$PROJECT_PREFIX . $controller;
         $instance = new $controller;
         $handler = [$instance, $this->method];
 

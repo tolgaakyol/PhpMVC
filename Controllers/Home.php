@@ -6,6 +6,6 @@ use TolgaAkyol\PhpMVC\System\Controller;
 
 class Home extends Controller {
     public function home(): void {
-        $this->view("home");
+        $this->view("home", null, true);
     }
 }
