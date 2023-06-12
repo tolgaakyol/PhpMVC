@@ -40,12 +40,17 @@ class Session
   }
 
   public static function createUserSession(string $userId, bool $regenSessionId = true, string|null $forcedSessionId = null): void {
-    if(MULTI_SESSION_LIMIT > 0) {
-      $count = self::$model->countUserSessions($userId);
+    try {
+      if(constant('MULTI_SESSION_LIMIT') > 0) {
+        $count = self::$model->countUserSessions($userId);
 
-      if($count >= MULTI_SESSION_LIMIT) {
-        self::$model->destroyUserSession($userId);
+        if($count >= constant('MULTI_SESSION_LIMIT')) {
+          self::$model->destroyUserSession($userId);
+        }
       }
+    } catch (Exception $e) {
+      Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+      die('Unable to proceed with the request due to system error'); // ERRMSG
     }
 
     if($regenSessionId) {
@@ -109,7 +114,12 @@ class Session
     );
 
     if (self::$model->storeAuthCookie($dbData)) {
-      setcookie('auth', $token, $expiresAtCookie, '/', URL_ROOT, HTTPS_ENABLED, true);
+      try {
+        setcookie('auth', $token, $expiresAtCookie, '/', constant('URL_ROOT'), constant('HTTPS_ENABLED'), true);
+      } catch (Exception $e) {
+        Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+        die('Unable to proceed with the request due to system error');
+      }
       return true;
     } else {
       return false;
@@ -147,9 +157,14 @@ class Session
       return $returnError ? Error::session_NetworkChanged : false;
     }
 
-    if (ROLE_CHANGE_REQ_LOGIN && $user['level'] != $session['level']) {
-      self::logout();
-      return $returnError ? Error::session_LevelMismatch : false;
+    try {
+      if (constant('ROLE_CHANGE_REQ_LOGIN') && $user['level'] != $session['level']) {
+        self::logout();
+        return $returnError ? Error::session_LevelMismatch : false;
+      }
+    } catch (Exception $e) {
+      Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+      return false;
     }
 
     if ($level > 0 && $user['level'] < $level) {
@@ -202,7 +217,12 @@ class Session
   }
 
   public static function unsetCookie(string $name): void {
-    setcookie($name, '', time()-86401, "/", URL_ROOT, HTTPS_ENABLED, false);
+    try {
+      setcookie($name, '', time()-86401, "/", constant('URL_ROOT'), constant('HTTPS_ENABLED'), false);
+    } catch (Exception $e) {
+      Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined' . $e->getMessage());
+      die('Unable to proceed with the request due to system error');
+    }
   }
 
   public static function logout(): void

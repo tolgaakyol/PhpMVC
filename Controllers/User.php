@@ -47,7 +47,8 @@ class User extends Controller
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $filter = new InputFilter();
 
-      $filter   ->post(LOGIN_WITH)
+      try {
+        $filter ->post(constant('LOGIN_WITH'))
                 ->required()
 
                 ->post('password')
@@ -56,30 +57,33 @@ class User extends Controller
                 ->post('remember')
                 ->length(0,1);
 
-      if($filter->getErrors()) {
-        $this->view('User/Login', ['errors' => $filter->getErrors()], true);
-        return;
+        if($filter->getErrors()) {
+          $this->view('User/Login', ['errors' => $filter->getErrors()], true);
+          return;
+        }
+
+        $login = $filter->getValues()[constant('LOGIN_WITH')];
+        $password = $filter->getValues()['password'];
+        $remember = $filter->getValues()['remember'];
+
+        $result = $this->model->login([$login, $password]);
+
+        if (!$result) {
+          die("Wrong credentials"); // ERRMSG
+        }
+
+        Session::createUserSession($result['user_id']);
+
+        if ($remember == 1) {
+          Session::createUserAuthCookie($result['user_id']);
+        }
+
+        # Redirect to profile page
+        header("Location: /user/profile");
+      } catch (Exception $e) {
+        Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+        die('Unable to proceed due to system error.'); // ERRMSG
       }
-
-      $login = $filter->getValues()[LOGIN_WITH];
-      $password = $filter->getValues()['password'];
-      $remember = $filter->getValues()['remember'];
-
-      $result = $this->model->login([$login, $password]);
-
-      if (!$result) {
-        die("Wrong credentials"); // ERRMSG
-      }
-
-      Session::createUserSession($result['user_id']);
-
-      if ($remember == 1) {
-        Session::createUserAuthCookie($result['user_id']);
-      }
-
-      # Redirect to profile page
-      header("Location: /user/profile");
-
     } else {
       $this->view("User/Login", null, true);
     }
@@ -93,66 +97,70 @@ class User extends Controller
     }
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-      $filter = new InputFilter();
-      $filter ->post('username')
-              ->required()
-              ->lettersOnly()
-              ->length(USERNAME_LENGTH_MIN, USERNAME_LENGTH_MAX)
+      try {
+        $filter = new InputFilter();
+        $filter ->post('username')
+            ->required()
+            ->lettersOnly()
+            ->length(constant('USERNAME_LENGTH_MIN'), constant('USERNAME_LENGTH_MAX'))
 
-              ->post('email')
-              ->required()
-              ->email()
+            ->post('email')
+            ->required()
+            ->email()
 
-              ->post('password')
-              ->required()
-              ->alphanumeric()
-              ->length(PASSWORD_LENGTH_MIN, PASSWORD_LENGTH_MAX)
+            ->post('password')
+            ->required()
+            ->alphanumeric()
+            ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
 
-              ->post('password_confirm')
-              ->required()
-              ->equalTo('password');
+            ->post('password_confirm')
+            ->required()
+            ->equalTo('password');
 
-      if($filter->getErrors()) {
-        $this->view('User/Create', ['errors' => $filter->getErrors()], true);
-        return;
-      }
+        if($filter->getErrors()) {
+          $this->view('User/Create', ['errors' => $filter->getErrors()], true);
+          return;
+        }
 
-      $username = $filter->getValues()['username'];
-      $email = $filter->getValues()['email'];
-      $password = $filter->getValues()['password'];
+        $username = $filter->getValues()['username'];
+        $email = $filter->getValues()['email'];
+        $password = $filter->getValues()['password'];
 
-      if ($this->model->checkIfExists("email", $email)) {
-        die("A user with this e-mail address is already registered!"); // ERRMSG
-      }
+        if ($this->model->checkIfExists("email", $email)) {
+          die("A user with this e-mail address is already registered!"); // ERRMSG
+        }
 
-      if ($this->model->checkIfExists("username", $username)) {
-        die("Username already exists"); // ERRMSG
-      }
+        if ($this->model->checkIfExists("username", $username)) {
+          die("Username already exists"); // ERRMSG
+        }
 
-      $userId = uniqid("u.", true);
-
-      while ($this->model->checkIfExists("user_id", $userId)) {
         $userId = uniqid("u.", true);
+
+        while ($this->model->checkIfExists("user_id", $userId)) {
+          $userId = uniqid("u.", true);
+        }
+
+        $password = password_hash($password, PASSWORD_DEFAULT);
+
+        $result = $this->model->create([$userId, $username, $password, $email, DEFAULT_USER_LEVEL]);
+
+        if(!$result) {
+          die("Error while creating the user!"); // ERRMSG
+        }
+
+        if(constant('REQUIRE_EMAIL_ACTIVATION')) {
+          $result = $this->generateToken($userId, TokenUseCase::Activation->value, '7D');
+        }
+
+        if(constant('REQUIRE_EMAIL_ACTIVATION') && !$result) {
+          die('Unable to create user activation token!'); // ERRMSG
+        }
+
+        print('User was created successfully!'); // TODO: Complete user creation
+      } catch (Exception $e) {
+        Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+        die('Unable to proceed due to system error.'); // ERRMSG
       }
-
-      $password = password_hash($password, PASSWORD_DEFAULT);
-
-      $result = $this->model->create([$userId, $username, $password, $email, DEFAULT_USER_LEVEL]);
-
-      if(!$result) {
-        die("Error while creating the user!"); // ERRMSG
-      }
-
-      if(REQUIRE_EMAIL_ACTIVATION) {
-        $result = $this->generateToken($userId, TokenUseCase::Activation->value, '7D');
-      }
-
-      if(REQUIRE_EMAIL_ACTIVATION && !$result) {
-        die('Unable to create user activation token!'); // ERRMSG
-      }
-
-      print('User was created successfully!'); // TODO: Complete user creation
-
     } else {
       $this->view("User/Create", null, true);
     }
@@ -215,38 +223,40 @@ class User extends Controller
         die('Unable to process the request.'); // ERRMSG
       }
     } else if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($token)) {
-      $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
-      $user = $this->model->getUserByKey('user_id', $validToken['user_id']);
+      try {
+        $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
+        $user = $this->model->getUserByKey('user_id', $validToken['user_id']);
 
-      if(!$user) { die('Unable to retrieve user information from the server!'); } // ERRMSG
+        if(!$user) { die('Unable to retrieve user information from the server!'); } // ERRMSG
 
-      $filter = new InputFilter();
-      $filter ->post('password')
-              ->required()
-              ->alphanumeric()
-              ->length(PASSWORD_LENGTH_MIN, PASSWORD_LENGTH_MAX)
+        $filter = new InputFilter();
+        $filter ->post('password')
+            ->required()
+            ->alphanumeric()
+            ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
 
-              ->post('password_confirm')
-              ->required()
-              ->equalTo('password');
+            ->post('password_confirm')
+            ->required()
+            ->equalTo('password');
 
-      if($filter->getErrors()) {
-        $this->view('User/NewPassword', ['email' => $user['email'], 'errors' => $filter->getErrors()], true);
-        return;
+        if($filter->getErrors()) {
+          $this->view('User/NewPassword', ['email' => $user['email'], 'errors' => $filter->getErrors()], true);
+          return;
+        }
+
+        $password = $filter->getValues()['password'];
+
+        $result = $this->model->updatePassword($validToken['user_id'], password_hash($password, PASSWORD_DEFAULT));
+
+        if($result) {
+          $this->model->destroyToken($token);
+          print('Password was changed successfully!'); // TODO: Proper action after user password change
+        } else {
+          throw new Exception('Unable to update password.');
+        }
+      } catch (Exception $e) {
+        Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
       }
-
-      $password = $filter->getValues()['password'];
-
-      $result = $this->model->updatePassword($validToken['user_id'], password_hash($password, PASSWORD_DEFAULT));
-
-      if($result) {
-        $this->model->destroyToken($token);
-        print('Password was changed successfully!'); // TODO: Proper action after user password change
-      } else {
-        Log::toFile(LogType::Error, __METHOD__, 'Unable to update the password of user: ' . $validToken['user_id']);
-        die ('Unable to update password!'); // ERRMSG
-      }
-
     } else if (!empty($token)) {
       $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
       $user = $this->model->getUserByKey('user_id', $validToken['user_id']);

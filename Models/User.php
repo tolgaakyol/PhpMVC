@@ -2,6 +2,7 @@
 
 namespace TolgaAkyol\PhpMVC\Models;
 
+use Exception;
 use TolgaAkyol\PhpMVC\Config\TokenUseCase;
 use TolgaAkyol\PhpMVC\System\{Model, Log, LogType};
 use TolgaAkyol\PhpMVC\Helpers\SQLFilter;
@@ -20,17 +21,22 @@ class User extends Model
   public function login($userData): array|false {
     [$login, $password] = $userData;
 
-    if ($this->checkIfExists(LOGIN_WITH, $login, true)) {
-      $storedUserData = $this->getUserByKey(LOGIN_WITH, $login);
+    try {
+      if ($this->checkIfExists(constant('LOGIN_WITH'), $login, true)) {
+        $storedUserData = $this->getUserByKey(constant('LOGIN_WITH'), $login);
 
-      if (password_verify($password, $storedUserData['password'])) {
-        if(isset($storedUserData['password'])) { unset($storedUserData['password']); }
-        return $storedUserData;
+        if (password_verify($password, $storedUserData['password'])) {
+          if(isset($storedUserData['password'])) { unset($storedUserData['password']); }
+          return $storedUserData;
+        } else {
+          return false;
+        }
       } else {
         return false;
       }
-    } else {
-      return false;
+    } catch (Exception $e) {
+      Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined');
+      die('Unable to login user due to system error.');
     }
   }
 

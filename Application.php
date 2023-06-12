@@ -2,8 +2,6 @@
 
 namespace TolgaAkyol\PhpMVC;
 
-use TolgaAkyol\PhpMVC\Config as Config;
-
 class Application {
   public static bool $isFrameworkDev;
   public static string $PATH_CORE;

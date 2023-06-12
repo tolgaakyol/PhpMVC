@@ -45,7 +45,7 @@ foreach($fieldsAllowOverride as $field) {
 }
 
 # Timezone
-date_default_timezone_set(TIMEZONE);
+defined('TIMEZONE') && date_default_timezone_set(constant('TIMEZONE'));
 
 # User levels & authentication
 enum UserLevels: int {
@@ -59,7 +59,7 @@ enum TokenUseCase: int {
   case ResetPassword = 2;
 }
 
-if(REQUIRE_EMAIL_ACTIVATION) {
+if(constant('REQUIRE_EMAIL_ACTIVATION')) {
   define('DEFAULT_USER_LEVEL', UserLevels::Inactive->value);
 } else {
   define('DEFAULT_USER_LEVEL', UserLevels::Standard->value);

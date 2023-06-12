@@ -3,6 +3,7 @@
 namespace TolgaAkyol\PhpMVC\System;
 
 use DateTime;
+use Exception;
 use TolgaAkyol\PhpMVC\Config as Config;
 
 enum LogType
@@ -25,8 +26,12 @@ class Log
     {        
         $date = new DateTime("now");
 
-        // File name based on the log type and the date.
-        $file = DIR_LOGS . $date->format('Y-m') . '.log';
+        try {
+          // File name based on the log type and the date.
+          $file = constant('DIR_LOGS') . $date->format('Y-m') . '.log';
+        } catch (Exception) {
+          return false;
+        }
 
         // Clamp the string inputs
         $caller = substr($caller, 0, 60);

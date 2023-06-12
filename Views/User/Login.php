@@ -13,7 +13,7 @@ use TolgaAkyol\PhpMVC\Helpers\InputFilter;
 </head>
 <body>
   <form method="post">
-    <p><input type="text" name="<?= LOGIN_WITH ?>" placeholder="<?= LOGIN_WITH ?>"></p>
+    <p><input type="text" name="<?php if(defined('LOGIN_WITH')) echo constant('LOGIN_WITH'); ?>" placeholder="<?php if(defined('LOGIN_WITH')) echo constant('LOGIN_WITH'); ?>"></p>
     <?php
     InputFilter::printErrors($errors ?? null, 'username');
     ?>
