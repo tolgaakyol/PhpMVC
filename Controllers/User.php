@@ -18,9 +18,17 @@ use TolgaAkyol\PhpMVC\Models\User as Model;
 class User extends Controller
 {
   private Model $model;
+  private bool $coreViews;
 
   public function __construct()
   {
+    try {
+      $this->coreViews = constant('USE_CORE_AUTH_VIEWS');
+    } catch (Exception $e) {
+      Log::toFile(LogType::Critical, __METHOD__, 'Const undefined: ' . $e->getMessage());
+      die('Unable to proceed due to system error');
+    }
+
     $this->model = $this->model('User', true);
     if(!Session::checkIfAuthorized()) {
       Session::validateCookie();
@@ -29,13 +37,7 @@ class User extends Controller
 
   public function home(): void // TEST
   {
-    if (Session::checkIfAuthorized(1)) {
-      echo "<pre>";
-      print_r($this->model->list());
-      echo "</pre>";
-    } else {
-      die("You are not allowed to view this page!"); // ERRMSG
-    }
+    $this->profile();
   }
 
   public function login(): void //
@@ -58,7 +60,7 @@ class User extends Controller
                 ->length(0,1);
 
         if($filter->getErrors()) {
-          $this->view('User/Login', ['errors' => $filter->getErrors()], true);
+          $this->view('User/Login', ['errors' => $filter->getErrors()], $this->coreViews);
           return;
         }
 
@@ -85,7 +87,7 @@ class User extends Controller
         die('Unable to proceed due to system error.'); // ERRMSG
       }
     } else {
-      $this->view("User/Login", null, true);
+      $this->view("User/Login", null, $this->coreViews);
     }
   }
 
@@ -118,7 +120,7 @@ class User extends Controller
             ->equalTo('password');
 
         if($filter->getErrors()) {
-          $this->view('User/Create', ['errors' => $filter->getErrors()], true);
+          $this->view('User/Create', ['errors' => $filter->getErrors()], $this->coreViews);
           return;
         }
 
@@ -162,7 +164,7 @@ class User extends Controller
         die('Unable to proceed due to system error.'); // ERRMSG
       }
     } else {
-      $this->view("User/Create", null, true);
+      $this->view("User/Create", null, $this->coreViews);
     }
   }
 
@@ -172,7 +174,7 @@ class User extends Controller
       $this->logout();
     }
 
-    $this->view("User/Profile", ["username" => Session::get('username')], true);
+    $this->view("User/Profile", ["username" => Session::get('username')], $this->coreViews);
   }
 
   public function logout(): void
@@ -205,7 +207,7 @@ class User extends Controller
               ->email();
 
       if($filter->getErrors()) {
-        $this->view('User/RequestRecovery', ['errors' => $filter->getErrors()], true);
+        $this->view('User/RequestRecovery', ['errors' => $filter->getErrors()], $this->coreViews);
         return;
       }
 
@@ -240,7 +242,7 @@ class User extends Controller
             ->equalTo('password');
 
         if($filter->getErrors()) {
-          $this->view('User/NewPassword', ['email' => $user['email'], 'errors' => $filter->getErrors()], true);
+          $this->view('User/NewPassword', ['email' => $user['email'], 'errors' => $filter->getErrors()], $this->coreViews);
           return;
         }
 
@@ -263,9 +265,9 @@ class User extends Controller
 
       if(!$user) { die('Unable to retrieve user information from the server!'); } // ERRMSG
 
-      $this->view('User/NewPassword', ['email' => $user['email']], true);
+      $this->view('User/NewPassword', ['email' => $user['email']], $this->coreViews);
     } else {
-      $this->view('User/RequestRecovery', null, true);
+      $this->view('User/RequestRecovery', null, $this->coreViews);
     }
   }
 

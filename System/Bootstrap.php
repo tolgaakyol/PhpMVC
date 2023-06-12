@@ -47,6 +47,7 @@ class Bootstrap
   {
     try {
       $isCore = true;
+      if($this->controller == 'Favicon.ico')  { return; }
       $controller = constant('DIR_CONTROLLERS') . $this->controller;
       if (file_exists(Application::$PATH_CORE . $controller . '.php')) {
         include Application::$PATH_CORE . $controller . '.php';
@@ -54,7 +55,7 @@ class Bootstrap
         $isCore = false;
         include Application::$PATH_EXT . $controller . '.php';
       } else {
-        throw new Exception('Controller not found!');
+        throw new Exception('Controller not found!: ' . $this->controller);
       }
       $controller = str_replace('/', '\\', $controller);
       $controller = $isCore ? constant('PACKAGE_PREFIX') . $controller : Application::$PROJECT_PREFIX . $controller;

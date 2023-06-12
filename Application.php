@@ -43,7 +43,7 @@ class Application {
     }
 
     try {
-      foreach (glob((string) constant('DIR_HELPERS') . '*.php') as $fileName) {
+      foreach (glob(constant('DIR_HELPERS') . '*.php') as $fileName) {
         include $fileName;
       }
 
