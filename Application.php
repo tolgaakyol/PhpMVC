@@ -2,6 +2,8 @@
 
 namespace TolgaAkyol\PhpMVC;
 
+use Exception;
+
 class Application {
   public static bool $isFrameworkDev;
   public static string $PATH_CORE;
@@ -40,12 +42,16 @@ class Application {
       include $fileName;
     }
 
-    foreach (glob(DIR_HELPERS . '*.php') as $fileName) {
-      include $fileName;
-    }
+    try {
+      foreach (glob((string) constant('DIR_HELPERS') . '*.php') as $fileName) {
+        include $fileName;
+      }
 
-    # Error reporting
-    $errorReportingOverride && error_reporting(ERROR_REPORTING);
+      # Error reporting
+      $errorReportingOverride && error_reporting(constant('ERROR_REPORTING'));
+    } catch (Exception) {
+      die('Unable to proceed due to system error'); // ERRMSG
+    }
 
     # System autoloader
     spl_autoload_register(function ($class) {
