@@ -8,11 +8,11 @@ use DateTimeZone;
 use Exception;
 use TolgaAkyol\PhpMVC\Helpers\{Reformatter, Generator};
 use TolgaAkyol\PhpMVC\Models\Session as Model;
-use TolgaAkyol\PhpMVC\Config as Config;
 use WhichBrowser\Parser;
 
 class Session
 {
+  public static bool $isLoggedIn = false;
   private static Model $model;
 
   public function __construct() {
@@ -82,6 +82,7 @@ class Session
     unset($sessionData['username']);
     $sessionData['session_id'] = session_id();
     self::$model->storeSessionToken($sessionData);
+    self::$isLoggedIn = true;
   }
 
   public static function createUserAuthCookie(string $userId): bool {
@@ -128,6 +129,7 @@ class Session
 
   public static function checkIfUserSessionExists(): bool {
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['username']) || !isset($_SESSION['ipv4']) || !isset($_SESSION['level'])) {
+      self::$isLoggedIn = false;
       return false;
     } else {
       return true;
@@ -171,6 +173,7 @@ class Session
       return $returnError ? Error::session_Unauthorized : false;
     }
 
+    self::$isLoggedIn = true;
     return true;
   }
 
@@ -227,6 +230,7 @@ class Session
 
   public static function logout(): void
   {
+    self::$isLoggedIn = false;
     self::initializeModel();
     self::unsetCookie('auth');
     self::$model->logout();

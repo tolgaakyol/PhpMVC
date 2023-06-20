@@ -153,6 +153,20 @@ class InputFilter {
     }
   }
 
+  public static function hasErrors(array|null $errorContainer, string $fieldName): bool {
+    return !empty($errorContainer[$fieldName]);
+  }
+
+  public static function returnErrors(array|null $errorContainer, string $fieldName): array {
+    $errors = [];
+
+    if(self::hasErrors($errorContainer, $fieldName)) {
+      $errors = $errorContainer[$fieldName];
+    }
+
+    return $errors;
+  }
+
   public function getValues(): array {
     return $this->values;
   }
