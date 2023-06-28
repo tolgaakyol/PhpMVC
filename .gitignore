@@ -18,7 +18,7 @@ index.php
 
 !/Controllers
 /Controllers/*
-!Controllers/Home.php
+!Controllers/MVC.php
 !Controllers/User.php
 
 

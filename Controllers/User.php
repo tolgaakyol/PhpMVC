@@ -35,7 +35,7 @@ class User extends Controller
     }
   }
 
-  public function home(): void // TEST
+  public function index(): void // TEST
   {
     $this->profile();
   }

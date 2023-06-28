@@ -8,8 +8,8 @@ const URL_FULL_DEFAULT = 'http://mvc.local/';
 const URL_ROOT_DEFAULT = 'mvc.local';
 const PACKAGE_PREFIX_DEFAULT = 'TolgaAkyol\PhpMVC\\';
 const TIMEZONE_DEFAULT = 'Etc/GMT-3';
-const INDEX_CONTROLLER_DEFAULT = 'Home';
-const INDEX_METHOD_DEFAULT = 'home';
+const INDEX_CONTROLLER_DEFAULT = 'MVC';
+const INDEX_METHOD_DEFAULT = 'index';
 const ERROR_REPORTING_DEFAULT = E_ALL;
 const HTTPS_ENABLED_DEFAULT = false;
 
@@ -29,6 +29,7 @@ const USERNAME_LENGTH_MAX_DEFAULT = 20;
 const PASSWORD_LENGTH_MIN_DEFAULT = 6;
 const PASSWORD_LENGTH_MAX_DEFAULT = 30;
 const USE_CORE_AUTH_VIEWS_DEFAULT = true;
+const USE_CORE_INDEX_PAGE_DEFAULT = true;
 
 # Directories
 const DIR_CONFIG_DEFAULT = 'Config/';
