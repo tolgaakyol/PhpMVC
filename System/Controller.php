@@ -13,7 +13,7 @@ class Controller
       $prefix = $isCore ? Application::$PATH_CORE : Application::$PATH_EXT;
       $fileName = $prefix . constant('DIR_MODELS') . $modelName . '.php';
       $instance = ucwords(constant('DIR_MODELS')) . $modelName;
-      $instance = str_replace('/', '\\', $instance);
+      $instance = str_replace(DIRECTORY_SEPARATOR, '\\', $instance);
       $instance = constant('PACKAGE_PREFIX') . $instance;
 
       if (file_exists($fileName)) {

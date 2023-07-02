@@ -7,6 +7,8 @@ index.php
 
 ###
 
+!/Logs
+
 !/Views
 /Views/*
 !/Views/User
