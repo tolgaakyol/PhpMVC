@@ -16,29 +16,29 @@ class Application {
 
     self::$isFrameworkDev = $mvcDev;
     if(!$mvcDev && $projectDir) {
-      self::$PATH_EXT = $projectDir . '\\';
+      self::$PATH_EXT = $projectDir  . DIRECTORY_SEPARATOR;
     } else if(!$mvcDev && !$projectDir) {
       self::$PATH_EXT = $this->findPath('index.php', 'src');
     } else {
       self::$PATH_EXT = '';
     }
-    self::$PATH_CORE = $mvcDev ? '' : $this->findPath('tolgaakyol\php-mvc\Application.php', 'php-mvc');
+    self::$PATH_CORE = $mvcDev ? '' : $this->findPath('tolgaakyol' . DIRECTORY_SEPARATOR . 'php-mvc' . DIRECTORY_SEPARATOR . 'Application.php', 'php-mvc');
     self::$PROJECT_PREFIX = $projectNamespace . '\\';
 
     !self::$isFrameworkDev && $this->createHtaccess();
 
     # Load config files
     if(!self::$isFrameworkDev && self::$PATH_EXT) {
-      foreach (glob( self::$PATH_EXT. 'Config/*.php') as $fileName) {
+      foreach (glob( self::$PATH_EXT. 'Config' . DIRECTORY_SEPARATOR . '*.php') as $fileName) {
         include $fileName;
       }
 
-      foreach (glob(self::$PATH_EXT . 'Helpers/*.php') as $fileName) {
+      foreach (glob(self::$PATH_EXT . 'Helpers' . DIRECTORY_SEPARATOR . '*.php') as $fileName) {
         include $fileName;
       }
     }
 
-    foreach (glob(self::$PATH_CORE . 'Config/*.php') as $fileName) {
+    foreach (glob(self::$PATH_CORE . 'Config' . DIRECTORY_SEPARATOR . '*.php') as $fileName) {
       include $fileName;
     }
 
@@ -55,8 +55,8 @@ class Application {
 
     # System autoloader
     spl_autoload_register(function ($class) {
-      $class = str_replace('\\', '/', $class);
-      $class = str_replace('TolgaAkyol/PhpMVC/', '', $class);
+      $class = str_replace('TolgaAkyol\PhpMVC\\', '', $class);
+      $class = str_replace('\\', DIRECTORY_SEPARATOR, $class);
       include_once $class . '.php';
     });
 
@@ -77,12 +77,12 @@ class Application {
     if(!$path) {
       return false;
     } else {
-      $directories = explode('\\', $path);
+      $directories = explode(DIRECTORY_SEPARATOR, $path);
       if($directoryToSelect) {
         $vendorKey = array_search($directoryToSelect, $directories);
         $directories = array_splice($directories, 0, $vendorKey+1);
       }
-      return implode('/', $directories) . '/';
+      return implode(DIRECTORY_SEPARATOR, $directories) . DIRECTORY_SEPARATOR;
     }
   }
 
@@ -109,10 +109,10 @@ class Application {
   }
 
   public static function getCustomConfig(): string|false {
-    if(self::$isFrameworkDev || !file_exists(self::$PATH_EXT.'Config/main.php')) {
+    if(self::$isFrameworkDev || !file_exists(self::$PATH_EXT.'Config' . DIRECTORY_SEPARATOR . 'main.php')) {
       return false;
     } else {
-      return self::$PROJECT_PREFIX . 'Config\\';
+      return self::$PROJECT_PREFIX . 'Config' . DIRECTORY_SEPARATOR;
     }
   }
 }

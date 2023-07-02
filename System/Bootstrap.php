@@ -57,7 +57,7 @@ class Bootstrap
       } else {
         throw new Exception('Controller not found!: ' . $this->controller);
       }
-      $controller = str_replace('/', '\\', $controller);
+      $controller = str_replace(DIRECTORY_SEPARATOR, '\\', $controller);
       $controller = $isCore ? constant('PACKAGE_PREFIX') . $controller : Application::$PROJECT_PREFIX . $controller;
       $instance = new $controller;
       $handler = [$instance, $this->method];
