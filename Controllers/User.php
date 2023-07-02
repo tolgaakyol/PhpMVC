@@ -6,7 +6,6 @@ use DateInterval;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
-use Exception;
 use TolgaAkyol\PhpMVC\{Helpers\Generator,
     Helpers\InputFilter
 };
@@ -82,8 +81,10 @@ class User extends Controller
 
         # Redirect to profile page
         header("Location: /user/profile");
-      } catch (Exception $e) {
-        Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+      } catch (\Error $e) {
+        if(str_contains($e->getMessage(), 'Undefined constant')) {
+          Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
+        }
         die('Unable to proceed due to system error.'); // ERRMSG
       }
     } else {
@@ -159,8 +160,10 @@ class User extends Controller
         }
 
         print('User was created successfully!'); // TODO: Complete user creation
-      } catch (Exception $e) {
-        Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+      } catch (\Error $e) {
+        if(str_contains($e->getMessage(), 'Undefined constant')) {
+          Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
+        }
         die('Unable to proceed due to system error.'); // ERRMSG
       }
     } else {

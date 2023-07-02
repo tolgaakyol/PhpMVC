@@ -112,7 +112,7 @@ class Application {
     if(self::$isFrameworkDev || !file_exists(self::$PATH_EXT.'Config' . DIRECTORY_SEPARATOR . 'main.php')) {
       return false;
     } else {
-      return self::$PROJECT_PREFIX . 'Config' . DIRECTORY_SEPARATOR;
+      return self::$PROJECT_PREFIX . 'Config\\';
     }
   }
 }
