@@ -23,7 +23,7 @@ class User extends Controller
   {
     try {
       $this->coreViews = constant('USE_CORE_AUTH_VIEWS');
-    } catch (Exception $e) {
+    } catch (\Error $e) {
       Log::toFile(LogType::Critical, __METHOD__, 'Const undefined: ' . $e->getMessage());
       die('Unable to proceed due to system error');
     }
@@ -55,6 +55,8 @@ class User extends Controller
                 ->post('password')
                 ->required()
 
+                ->post('token')
+
                 ->post('remember')
                 ->length(0,1);
 
@@ -66,6 +68,27 @@ class User extends Controller
         $login = $filter->getValues()[constant('LOGIN_WITH')];
         $password = $filter->getValues()['password'];
         $remember = $filter->getValues()['remember'];
+        $token = $filter->getValues()['token'];
+
+        echo $token;
+
+        if(constant('USE_RECAPTCHA')) {
+          $ch = curl_init();
+          curl_setopt($ch, CURLOPT_URL,"https://www.google.com/recaptcha/api/siteverify");
+          curl_setopt($ch, CURLOPT_POST, 1);
+          curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array('secret' => constant('RECAPTCHA_SECRET_KEY'), 'response' => $token)));
+          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+          $response = curl_exec($ch);
+          curl_close($ch);
+          $arrResponse = json_decode($response, true);
+
+          // TODO: Refactor logic!!
+          if(!isset($arrResponse) && $arrResponse['success'] && $arrResponse['score'] >= 0.5) {
+
+          } else {
+            die('Recaptcha has failed to validate that you are a human.'); // ERRMSG
+          }
+        }
 
         $result = $this->model->login([$login, $password]);
 
@@ -257,9 +280,9 @@ class User extends Controller
           $this->model->destroyToken($token);
           print('Password was changed successfully!'); // TODO: Proper action after user password change
         } else {
-          throw new Exception('Unable to update password.');
+          throw new \Exception('Unable to update password.');
         }
-      } catch (Exception $e) {
+      } catch (\Exception $e) {
         Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
       }
     } else if (!empty($token)) {
@@ -285,7 +308,7 @@ class User extends Controller
     try {
       $now = new DateTime('now', new DateTimeZone('Europe/Istanbul'));
       $now = $now->format('YmdHis');
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       Log::toFile(LogType::Error, __METHOD__, 'Unable to capture current timestamp: ' . $e->getMessage());
       die('Unable to validate token!'); // ERRMSG
     }
@@ -318,7 +341,7 @@ class User extends Controller
     try {
       $now = new DateTimeImmutable('now', new DateTimeZone('Europe/Istanbul'));
       $expiresAt = $now->add(new DateInterval('P' . $lifespan))->format('YmdHis');
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       Log::toFile(LogType::Error, __METHOD__, 'Unable to capture current timestamp: ' . $e->getMessage());
       return false;
     }
