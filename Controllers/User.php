@@ -55,7 +55,7 @@ class User extends Controller
                 ->post('password')
                 ->required()
 
-                ->post('token')
+                ->post('g-recaptcha-response')
 
                 ->post('remember')
                 ->length(0,1);
@@ -68,9 +68,7 @@ class User extends Controller
         $login = $filter->getValues()[constant('LOGIN_WITH')];
         $password = $filter->getValues()['password'];
         $remember = $filter->getValues()['remember'];
-        $token = $filter->getValues()['token'];
-
-        echo $token;
+        $token = $filter->getValues()['g-recaptcha-response'];
 
         if(constant('USE_RECAPTCHA')) {
           $ch = curl_init();
@@ -82,11 +80,8 @@ class User extends Controller
           curl_close($ch);
           $arrResponse = json_decode($response, true);
 
-          // TODO: Refactor logic!!
-          if(!isset($arrResponse) && $arrResponse['success'] && $arrResponse['score'] >= 0.5) {
-
-          } else {
-            die('Recaptcha has failed to validate that you are a human.'); // ERRMSG
+          if(!$arrResponse['success'] || $arrResponse['action'] != 'login' || $arrResponse['score'] < 0.5) {
+            die('Recaptcha has failed to validate that you are a human!'); // ERRMSG
           }
         }
 
