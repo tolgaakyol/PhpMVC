@@ -55,10 +55,10 @@ class User extends Controller
                 ->post('password')
                 ->required()
 
-                ->post('g-recaptcha-response')
-
                 ->post('remember')
-                ->length(0,1);
+                ->length(0,1)
+
+                ->post('g-recaptcha-response');
 
         if($filter->getErrors()) {
           $this->view('User/Login', ['errors' => $filter->getErrors()], $this->coreViews);
@@ -68,21 +68,11 @@ class User extends Controller
         $login = $filter->getValues()[constant('LOGIN_WITH')];
         $password = $filter->getValues()['password'];
         $remember = $filter->getValues()['remember'];
-        $token = $filter->getValues()['g-recaptcha-response'];
 
-        if(constant('USE_RECAPTCHA')) {
-          $ch = curl_init();
-          curl_setopt($ch, CURLOPT_URL,"https://www.google.com/recaptcha/api/siteverify");
-          curl_setopt($ch, CURLOPT_POST, 1);
-          curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array('secret' => constant('RECAPTCHA_SECRET_KEY'), 'response' => $token)));
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          $response = curl_exec($ch);
-          curl_close($ch);
-          $arrResponse = json_decode($response, true);
-
-          if(!$arrResponse['success'] || $arrResponse['action'] != 'login' || $arrResponse['score'] < 0.5) {
-            die('Recaptcha has failed to validate that you are a human!'); // ERRMSG
-          }
+        $recaptcha = $this->recaptcha($filter->getValues()['g-recaptcha-response'], 'login');
+        if(!$recaptcha) {
+          $this->view('User/Create', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.'], $this->coreViews);
+          return;
         }
 
         $result = $this->model->login([$login, $password]);
@@ -121,22 +111,24 @@ class User extends Controller
       try {
         $filter = new InputFilter();
         $filter ->post('username')
-            ->required()
-            ->lettersOnly()
-            ->length(constant('USERNAME_LENGTH_MIN'), constant('USERNAME_LENGTH_MAX'))
+                ->required()
+                ->lettersOnly()
+                ->length(constant('USERNAME_LENGTH_MIN'), constant('USERNAME_LENGTH_MAX'))
 
-            ->post('email')
-            ->required()
-            ->email()
+                ->post('email')
+                ->required()
+                ->email()
 
-            ->post('password')
-            ->required()
-            ->alphanumeric()
-            ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
+                ->post('password')
+                ->required()
+                ->alphanumeric()
+                ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
 
-            ->post('password_confirm')
-            ->required()
-            ->equalTo('password');
+                ->post('password_confirm')
+                ->required()
+                ->equalTo('password')
+
+                ->post('g-recaptcha-response');
 
         if($filter->getErrors()) {
           $this->view('User/Create', ['errors' => $filter->getErrors()], $this->coreViews);
@@ -146,6 +138,12 @@ class User extends Controller
         $username = $filter->getValues()['username'];
         $email = $filter->getValues()['email'];
         $password = $filter->getValues()['password'];
+
+        $recaptcha = $this->recaptcha($filter->getValues()['g-recaptcha-response'], 'create');
+        if(!$recaptcha) {
+          $this->view('User/Create', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.'], $this->coreViews);
+          return;
+        }
 
         if ($this->model->checkIfExists("email", $email)) {
           die("A user with this e-mail address is already registered!"); // ERRMSG
@@ -351,5 +349,26 @@ class User extends Controller
     $result = $this->model->storeToken($content);
 
     return ($returnToken && $result) ? $token : $result;
+  }
+
+  private function recaptcha($response, $formName): bool {
+    if(!constant('USE_RECAPTCHA')) {
+      return true;
+    }
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL,"https://www.google.com/recaptcha/api/siteverify");
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array('secret' => constant('RECAPTCHA_SECRET_KEY'), 'response' => $response)));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    $arrResponse = json_decode($response, true);
+
+    if(!$arrResponse['success'] || $arrResponse['action'] != $formName || $arrResponse['score'] < 0.5) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }
