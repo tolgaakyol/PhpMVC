@@ -69,10 +69,13 @@ class User extends Controller
         $password = $filter->getValues()['password'];
         $remember = $filter->getValues()['remember'];
 
-        $recaptcha = $this->recaptcha($filter->getValues()['g-recaptcha-response'], 'login');
-        if(!$recaptcha) {
-          $this->view('User/Create', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.'], $this->coreViews);
-          return;
+
+        if(constant('USE_RECAPTCHA')) {
+          $recaptcha = $this->recaptcha($filter->getValues()['g-recaptcha-response'], 'login');
+          if(!$recaptcha) {
+            $this->view('User/Create', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.'], $this->coreViews);
+            return;
+          }
         }
 
         $result = $this->model->login([$login, $password]);
