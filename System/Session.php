@@ -47,8 +47,8 @@ class Session
           self::$model->destroyUserSession($userId);
         }
       }
-    } catch (Exception $e) {
-      Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+    } catch (\Error $e) {
+      Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
       die('Unable to proceed with the request due to system error'); // ERRMSG
     }
 
@@ -115,8 +115,8 @@ class Session
     if (self::$model->storeAuthCookie($dbData)) {
       try {
         setcookie('auth', $token, $expiresAtCookie, '/', constant('URL_ROOT'), constant('HTTPS_ENABLED'), true);
-      } catch (Exception $e) {
-        Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+      } catch (\Error $e) {
+        Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
         die('Unable to proceed with the request due to system error');
       }
       return true;
@@ -169,8 +169,8 @@ class Session
         self::logout();
         return $returnError ? Error::session_LevelMismatch : false;
       }
-    } catch (Exception $e) {
-      Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
+    } catch (\Error $e) {
+      Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
       return false;
     }
 
@@ -226,8 +226,8 @@ class Session
   public static function unsetCookie(string $name): void {
     try {
       setcookie($name, '', time()-86401, "/", constant('URL_ROOT'), constant('HTTPS_ENABLED'), false);
-    } catch (Exception $e) {
-      Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined' . $e->getMessage());
+    } catch (\Error $e) {
+      Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
       die('Unable to proceed with the request due to system error');
     }
   }

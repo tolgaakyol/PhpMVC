@@ -2,7 +2,7 @@
 
 namespace TolgaAkyol\PhpMVC\Models;
 
-use Exception;
+use Error;
 use TolgaAkyol\PhpMVC\Config\TokenUseCase;
 use TolgaAkyol\PhpMVC\System\{Model, Log, LogType};
 use TolgaAkyol\PhpMVC\Helpers\SQLFilter;
@@ -34,8 +34,8 @@ class User extends Model
       } else {
         return false;
       }
-    } catch (Exception $e) {
-      Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined');
+    } catch (Error $e) {
+      Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
       die('Unable to login user due to system error.');
     }
   }

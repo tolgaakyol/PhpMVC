@@ -44,7 +44,7 @@ class Log
 
   private static function checkLogFile($name): string
   {
-    $pathDir = Application::$PATH_CORE . constant('DIR_LOGS');
+    $pathDir = Application::$PATH_EXT . constant('DIR_LOGS');
     if (!file_exists($pathDir)) {
       mkdir($pathDir, 0744);
     }

@@ -24,7 +24,7 @@ class User extends Controller
     try {
       $this->coreViews = constant('USE_CORE_AUTH_VIEWS');
     } catch (\Error $e) {
-      Log::toFile(LogType::Critical, __METHOD__, 'Const undefined: ' . $e->getMessage());
+      Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
       die('Unable to proceed due to system error');
     }
 
@@ -255,13 +255,13 @@ class User extends Controller
 
         $filter = new InputFilter();
         $filter ->post('password')
-            ->required()
-            ->alphanumeric()
-            ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
+                ->required()
+                ->alphanumeric()
+                ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
 
-            ->post('password_confirm')
-            ->required()
-            ->equalTo('password');
+                ->post('password_confirm')
+                ->required()
+                ->equalTo('password');
 
         if($filter->getErrors()) {
           $this->view('User/NewPassword', ['email' => $user['email'], 'errors' => $filter->getErrors()], $this->coreViews);
