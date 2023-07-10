@@ -97,6 +97,13 @@ class Application {
 
     $contents = <<<'EOD'
     RewriteEngine On
+    
+    # Stop processing if already in the /public directory
+    RewriteRule ^public/ - [L]
+    
+    # Static resources if they exist
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+    RewriteRule (.+) public/$1 [L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
