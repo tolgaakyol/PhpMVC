@@ -108,7 +108,7 @@ class Session
         'expires_at' => $expiresAtDb,
         'ipv4' => Reformatter::ipv4($_SERVER['REMOTE_ADDR']),
         'device' => $userAgent->device->type,
-        'os' => $userAgent->os->toString(),
+        'os' => substr($userAgent->os->toString(), 0, 15),
         'browser' => $userAgent->browser->toString()
     );
 
@@ -208,10 +208,10 @@ class Session
 
       $userAgent = array(
           'device' => $userAgent->device->type,
-          'os' => $userAgent->os->toString(),
+          'os' => substr($userAgent->os->toString(), 0, 15),
           'browser' => $userAgent->browser->toString());
 
-      if($dbEntry['device'] != $userAgent['device'] || $dbEntry['os'] != $userAgent['os'] || $dbEntry['browser'] != $userAgent['browser']){
+      if($dbEntry['device'] != $userAgent['device'] || substr($dbEntry['os'], 0 ,15) != $userAgent['os'] || $dbEntry['browser'] != $userAgent['browser']){
         self::unsetCookie('auth');
         return false;
       }
