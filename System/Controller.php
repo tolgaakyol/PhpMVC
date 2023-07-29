@@ -14,7 +14,7 @@ class Controller
       $fileName = $prefix . constant('DIR_MODELS') . $modelName . '.php';
       $instance = ucwords(constant('DIR_MODELS')) . $modelName;
       $instance = str_replace(DIRECTORY_SEPARATOR, '\\', $instance);
-      $instance = constant('PACKAGE_PREFIX') . $instance;
+      $instance = Application::$PROJECT_PREFIX . $instance;
 
       if (file_exists($fileName)) {
         include $fileName;
