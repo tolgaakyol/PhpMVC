@@ -48,4 +48,8 @@ class Controller
       die('Unable to proceed with the request due to system error.');
     }
   }
+
+  public function getScript($script): string {
+    return str_replace('\\', '/', '//' . constant('URL_ROOT') . '/' . constant('DIR_PUBLIC') . $script . '.js');
+  }
 }
