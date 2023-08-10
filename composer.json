@@ -22,6 +22,7 @@
     "whichbrowser/parser": "^2.1",
     "ext-ctype": "*",
     "ext-pdo": "*",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "mailjet/mailjet-apiv3-php": "dev-master"
   }
 }
