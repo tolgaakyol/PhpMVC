@@ -50,6 +50,6 @@ class Controller
   }
 
   public function getScript($script): string {
-    return str_replace('\\', '/', '//' . constant('URL_ROOT') . '/' . constant('DIR_PUBLIC') . $script . '.js');
+    return str_replace('\\', '/', '//' . constant('URL_ROOT') . '/' . constant('DIR_PUBLIC') . 'js/' . $script . '.js');
   }
 }
