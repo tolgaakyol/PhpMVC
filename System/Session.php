@@ -6,7 +6,7 @@ use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
-use TolgaAkyol\PhpMVC\Helpers\{Reformatter, Generator};
+use TolgaAkyol\PhpMVC\Helpers\{Geolocation, Reformatter, Generator};
 use TolgaAkyol\PhpMVC\Models\Session as Model;
 use WhichBrowser\Parser;
 
@@ -70,11 +70,20 @@ class Session
 
     $user = self::$model->getUserByKey(self::$model::id, $userId);
 
+    $userAgent = new Parser(getallheaders());
+
+    $geolocation = Geolocation::get($_SERVER['REMOTE_ADDR']);
+
     $sessionData = array(
-        'user_id' => $userId,
-        'username' => $user['username'],
-        'ipv4' => Reformatter::ipv4($_SERVER['REMOTE_ADDR']),
-        'level' => $user['level']
+      'user_id' => $userId,
+      'username' => $user['username'],
+      'ipv4' => Reformatter::ipv4($_SERVER['REMOTE_ADDR']),
+      'level' => $user['level'],
+      'device' => $userAgent->device->type,
+      'os' => substr($userAgent->os->toString(), 0, 15),
+      'browser' => $userAgent->browser->toString(),
+      'country' => $geolocation['country'],
+      'city' => $geolocation['city']
     );
 
     self::set($sessionData);
