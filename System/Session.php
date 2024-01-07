@@ -88,6 +88,11 @@ class Session
 
     self::set($sessionData);
     unset($sessionData['username']);
+    unset($sessionData['device']);
+    unset($sessionData['os']);
+    unset($sessionData['browser']);
+    unset($sessionData['country']);
+    unset($sessionData['city']);
     $sessionData['session_id'] = session_id();
     self::$model->storeSessionToken($sessionData);
   }
