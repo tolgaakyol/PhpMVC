@@ -14,7 +14,7 @@ class Geolocation {
 
     $geolocation = json_decode($json);
 
-    if($$geolocation->status === 'success') {
+    if($geolocation->status === 'success') {
       return ['country' => $geolocation->countryCode, 'city' => $geolocation->city];
     } else {
       return ['country' => '', 'city' => ''];
