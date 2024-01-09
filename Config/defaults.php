@@ -48,7 +48,3 @@ const DIR_PUBLIC_DEFAULT = 'Public' . DIRECTORY_SEPARATOR;
 
 # File handling related
 const CACHE_LIFETIME_DEFAULT = 86400;
-
-# E-mail related
-const MJ_APIKEY_PUBLIC_DEFAULT = "";
-const MJ_APIKEY_PRIVATE_DEFAULT = "";

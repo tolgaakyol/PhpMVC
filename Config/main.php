@@ -39,8 +39,7 @@ $fieldsAllowOverride = array(
   'DIR_HELPERS',
   'DIR_LOGS',
   'DIR_PUBLIC',
-  'MJ_APIKEY_PUBLIC',
-  'MJ_APIKEY_PRIVATE'
+  'CACHE_LIFETIME'
 );
 
 foreach($fieldsAllowOverride as $field) {
