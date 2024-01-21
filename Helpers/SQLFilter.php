@@ -13,6 +13,8 @@
 
 namespace TolgaAkyol\PhpMVC\Helpers;
 
+use TolgaAkyol\PhpMVC\System\Controller;
+
 class SQLFilter {
     
     private string $currentStmt;
@@ -85,7 +87,7 @@ class SQLFilter {
     private function createConditionalStatement($condition, $column, $operator, $value): void {
         if (count(array_keys($this->currentPairs)) >= 10)
         {
-            die("Maximum number of conditions reached."); // ERRMSG
+          Controller::systemError('Maximum number of conditions reached.', __METHOD__);
         }
 
         switch($condition)
@@ -100,7 +102,7 @@ class SQLFilter {
                 $this->currentStmt .= " AND NOT $column";
                 break;
             default:
-                die("Invalid condition."); // ERRMSG
+              Controller::systemError('Invalid operation.', __METHOD__);
         }
 
         $column = $this->avoidDuplicateColumns($column);
@@ -120,11 +122,11 @@ class SQLFilter {
             case '<=':
             case '<>':
             case 'LIKE':
-                if (is_array($value) && count($value) > 1) { die("Only one value must be provided inside the where clause for a single condition."); } // ERRMSG
+                if (is_array($value) && count($value) > 1) { Controller::systemError('Only one value must be provided inside the where clause for a single condition.', __METHOD__); }
                 $this->currentStmt .= " $operator " . $value;
                 break;
             case 'BETWEEN':
-                if (!is_array($value) || count($value) != 2) { die("In order to use the BETWEEN operator, 2 values must be provided as an array."); } // ERRMSG
+                if (!is_array($value) || count($value) != 2) { Controller::systemError("In order to use the BETWEEN operator, 2 values must be provided as an array.", __METHOD__); }
                 $this->currentStmt .= ' BETWEEN ' . $value[0] . ' AND ' . $value[1];
                 break;
             case 'IN':

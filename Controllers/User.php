@@ -9,7 +9,7 @@ use DateTimeZone;
 use TolgaAkyol\PhpMVC\{Helpers\Generator,
     Helpers\InputFilter
 };
-use TolgaAkyol\PhpMVC\System\{Controller, Mail, Session, Error, Log, LogType};
+use TolgaAkyol\PhpMVC\System\{Controller, Session, Log, LogType};
 use TolgaAkyol\PhpMVC\Config\TokenUseCase;
 use TolgaAkyol\PhpMVC\Models\User as Model;
 
@@ -22,10 +22,10 @@ class User extends Controller
   public function __construct()
   {
     try {
-      $this->coreViews = constant('USE_CORE_AUTH_VIEWS');
+      $this->coreViews = constant('USE_CORE_VIEWS');
     } catch (\Error $e) {
       Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
-      die('Unable to proceed due to system error');
+      Controller::systemError($e->getMessage(), __METHOD__);
     }
 
     $this->model = $this->model('User', true);
@@ -96,7 +96,7 @@ class User extends Controller
         if(str_contains($e->getMessage(), 'Undefined constant')) {
           Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
         }
-        die('Unable to proceed due to system error.'); // ERRMSG
+        Controller::systemError($e->getMessage(), __METHOD__);
       }
     } else {
       $this->view("User/Login", null, $this->coreViews);
@@ -171,12 +171,9 @@ class User extends Controller
         }
 
         if(constant('REQUIRE_EMAIL_ACTIVATION')) {
-          $result = $this->generateToken($userId, TokenUseCase::Activation->value, '7D');
-          if(!$result) die('Unable to create user activation token!'); // ERRMSG
+          $this->generateToken($userId, TokenUseCase::Activation->value, '7D');
 
-          $mail = new Mail(["Kolay Karar", "admin@tolgaakyol.net"], [$username, $email], "Hoşgeldiniz!", "User was created successfully!", "Your activation token is: $result");
-          $result = $mail->send();
-          if(!$result) die("Unable to send verification email! Please contact support."); // ERRMSG
+          die("Unable to send verification email! Please contact support."); // ERRMSG
         }
 
         print('User was created successfully!'); // TODO: Complete user creation

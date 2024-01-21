@@ -18,7 +18,7 @@ class Bootstrap
       $this->method = constant('INDEX_METHOD');
     } catch (Exception $e) {
       Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined. ' . $e->getMessage());
-      die('Unable to proceed with the request due to system error.');
+      Controller::systemError($e->getMessage(), __METHOD__);
     }
 
     $this->parseURL();
@@ -69,7 +69,14 @@ class Bootstrap
       }
     } catch (Exception $e) {
       Log::toFile(LogType::Critical, __METHOD__, 'Unable to initialize: ' . $e->getMessage());
-      die('Unable to initialize');
+
+      if(Application::$frameworkDevMode) {
+        Controller::displayError('Error/404', [
+            'message' => $e->getMessage(),
+        ], 404);
+      } else {
+        Controller::displayError();
+      }
     }
   }
 }

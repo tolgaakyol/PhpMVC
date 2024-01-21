@@ -4,7 +4,7 @@ namespace TolgaAkyol\PhpMVC\Controllers;
 
 use TolgaAkyol\PhpMVC\System\Controller;
 
-if(!constant('USE_CORE_INDEX_PAGE')) {
+if(!constant('USE_CORE_VIEWS')) {
   header('Location: ' . constant('URL_FULL'));
 }
 

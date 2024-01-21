@@ -49,12 +49,12 @@ class Session
       }
     } catch (\Error $e) {
       Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
-      die('Unable to proceed with the request due to system error'); // ERRMSG
+      Controller::systemError($e->getMessage(), __METHOD__);
     }
 
     if($regenSessionId) {
       if(!is_null($forcedSessionId)) {
-        die('Invalid operation!'); // ERRMSG
+        Controller::systemError('Invalid operation!', __METHOD__);
       }
 
       session_regenerate_id();
@@ -131,7 +131,7 @@ class Session
         setcookie('auth', $token, $expiresAtCookie, '/', constant('URL_ROOT'), constant('HTTPS_ENABLED'), true);
       } catch (\Error $e) {
         Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
-        die('Unable to proceed with the request due to system error');
+        Controller::systemError($e->getMessage(), __METHOD__);
       }
       return true;
     } else {
@@ -158,30 +158,29 @@ class Session
   /**
    *
    * @param int $level (optional) Pass in the permitted user level to restrict access to those who are below the limit.
-   * @param bool $returnError (optional) When passed in 'true', function will return the specific error as in the enumeration '\System\Error', instead of returning 'false'.
-   * @return bool|Error
+   * @return bool
    *
    */
-  public static function checkIfAuthorized(int $level = 0, bool $returnError = false): Error|bool {
+  public static function checkIfAuthorized(int $level = 0): bool {
     self::initializeModel();
 
     $session = self::checkIfUserSessionExists() ? self::$model->getStoredEntry(self::$model::session, session_id()) : false;
     $user = $session ? self::$model->getUserByKey(self::$model::id, $session['user_id']) : false;
 
     if (!$user || !$session) {
-      return $returnError ? Error::session_Missing : false;
+      return false;
     }
 
     if (ip2long($_SERVER['REMOTE_ADDR']) != $session['ipv4']) {
       // FIXME: IP address check is error-prone
       self::logout();
-      return $returnError ? Error::session_NetworkChanged : false;
+      return false;
     }
 
     try {
       if (constant('ROLE_CHANGE_REQ_LOGIN') && $user['level'] != $session['level']) {
         self::logout();
-        return $returnError ? Error::session_LevelMismatch : false;
+        return false;
       }
     } catch (\Error $e) {
       Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
@@ -189,7 +188,7 @@ class Session
     }
 
     if ($level > 0 && $user['level'] < $level) {
-      return $returnError ? Error::session_Unauthorized : false;
+      return false;
     }
 
     return true;
@@ -242,7 +241,7 @@ class Session
       setcookie($name, '', time()-86401, "/", constant('URL_ROOT'), constant('HTTPS_ENABLED'), false);
     } catch (\Error $e) {
       Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
-      die('Unable to proceed with the request due to system error');
+      Controller::systemError($e->getMessage(), __METHOD__);
     }
   }
 

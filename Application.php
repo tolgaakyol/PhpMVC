@@ -5,7 +5,7 @@ namespace TolgaAkyol\PhpMVC;
 use Exception;
 
 class Application {
-  public static bool $isFrameworkDev;
+  public static bool $frameworkDevMode;
   public static string $PATH_CORE;
   public static string|bool $PATH_EXT;
   public static string|false $PROJECT_PREFIX;
@@ -14,7 +14,7 @@ class Application {
     ini_set('session.use_strict_mode', true);
     session_start();
 
-    self::$isFrameworkDev = $mvcDev;
+    self::$frameworkDevMode = $mvcDev;
     if(!$mvcDev && $projectDir) {
       self::$PATH_EXT = $projectDir  . DIRECTORY_SEPARATOR;
     } else if(!$mvcDev && !$projectDir) {
@@ -25,10 +25,10 @@ class Application {
     self::$PATH_CORE = $mvcDev ? '' : $this->findPath('tolgaakyol' . DIRECTORY_SEPARATOR . 'php-mvc' . DIRECTORY_SEPARATOR . 'Application.php', 'php-mvc');
     self::$PROJECT_PREFIX = $projectNamespace . '\\';
 
-    !self::$isFrameworkDev && $this->createHtaccess();
+    !self::$frameworkDevMode && $this->createHtaccess();
 
     # Load config files
-    if(!self::$isFrameworkDev && self::$PATH_EXT) {
+    if(!self::$frameworkDevMode && self::$PATH_EXT) {
       foreach (glob( self::$PATH_EXT. 'Config' . DIRECTORY_SEPARATOR . '*.php') as $fileName) {
         include $fileName;
       }
@@ -50,7 +50,7 @@ class Application {
       # Error reporting
       $errorReportingOverride && error_reporting(constant('ERROR_REPORTING'));
     } catch (Exception) {
-      die('Unable to proceed due to system error'); // ERRMSG
+      die('Unable to proceed due to system error');
     }
 
     # System autoloader
@@ -116,7 +116,7 @@ class Application {
   }
 
   public static function getCustomConfig(): string|false {
-    if(self::$isFrameworkDev || !file_exists(self::$PATH_EXT.'Config' . DIRECTORY_SEPARATOR . 'main.php')) {
+    if(self::$frameworkDevMode || !file_exists(self::$PATH_EXT.'Config' . DIRECTORY_SEPARATOR . 'main.php')) {
       return false;
     } else {
       return self::$PROJECT_PREFIX . 'Config\\';

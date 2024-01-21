@@ -75,6 +75,6 @@ class FileHandler
   #[NoReturn]
   private function handleFileError($filePath): void {
     Log::toFile(LogType::Info, __METHOD__, 'Error accessing file: ' . $filePath);
-    die('Error accessing file: ' . $filePath);
+    Controller::systemError('Error accessing file: ' . $filePath, __METHOD__);
   }
 }

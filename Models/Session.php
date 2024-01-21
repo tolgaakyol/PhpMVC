@@ -2,6 +2,7 @@
 
 namespace TolgaAkyol\PhpMVC\Models;
 
+use TolgaAkyol\PhpMVC\System\Controller;
 use TolgaAkyol\PhpMVC\System\Model;
 use TolgaAkyol\PhpMVC\Helpers\SQLFilter;
 
@@ -49,7 +50,7 @@ class Session extends Model {
         $key = 'secret';
         break;
       default:
-        die('Unable to handle request!'); // ERRMSG
+        Controller::systemError('Incorrect arguments.', __METHOD__);
     }
 
     $where = new SQLFilter($key, "=", $value);
