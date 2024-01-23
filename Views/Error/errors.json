@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1001,
+    "caption": "Hatalı kullanıcı adı veya şifre",
+    "message": "Girdiğiniz kullanıcı adı ve şifre kombinasyonu hiçbir kullanıcı ile eşleşmiyor!",
+    "targetView": false,
+    "redirectURL": null,
+    "redirectLabel": null,
+    "httpResponseCode": 400
+  },
+  {
+    "id": 1002,
+    "caption": "Hatalı reCaptcha",
+    "message": "Güvenlik doğrulamasını geçemediniz! Lütfen tekrar deneyiniz.",
+    "targetView": false,
+    "redirectURL": null,
+    "redirectLabel": null,
+    "httpResponseCode": 400
+  },
+  {
+    "id": 1003,
+    "caption": "E-posta zaten kayıtlı",
+    "message": "Girdiğiniz e-posta adresi zaten kayıtlı! Giriş yapın veya şifremi unuttum bağlantısını kullanın.",
+    "targetView": false,
+    "redirectURL": null,
+    "redirectLabel": null,
+    "httpResponseCode": 400
+  },
+  {
+    "id": 1004,
+    "caption": "Kullanıcı adı zaten kullanılıyor",
+    "message": "Bu kullancı adı zaten kullanılıyor. Lütfen başka bir isim tercih ediniz.",
+    "targetView": false,
+    "redirectURL": null,
+    "redirectLabel": null,
+    "httpResponseCode": 400
+  },
+  {
+    "id": 1005,
+    "caption": "E-posta bulunamadı",
+    "message": "Girdiğiniz e-posta adresi ile kayıtlı bir kullanıcı bulunamadı!",
+    "targetView": false,
+    "redirectURL": null,
+    "redirectLabel": null,
+    "httpResponseCode": 400
+  },
+  {
+    "id": 1006,
+    "caption": "Kod geçersiz",
+    "message": "Girdiğiniz doğrulama kodu geçersiz!",
+    "targetView": false,
+    "redirectURL": null,
+    "redirectLabel": null,
+    "httpResponseCode": 400
+  },
+  {
+    "id": 1007,
+    "caption": "Kod girmeniz gerekiyor",
+    "message": "Bu işlem için doğrulama kodu gereklidir!",
+    "targetView": false,
+    "redirectURL": null,
+    "redirectLabel": null,
+    "httpResponseCode": 400
+  },
+  {
+    "id": 1008,
+    "caption": "Girilen kodun süresi dolmuş",
+    "message": "Girdiğiniz doğrulama kodunun kullanım süresi dolmuş!",
+    "targetView": false,
+    "redirectURL": null,
+    "redirectLabel": null,
+    "httpResponseCode": 400
+  }
+]
