@@ -36,7 +36,7 @@ class User extends Model
       }
     } catch (Error $e) {
       Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
-      Controller::systemError($e->getMessage(), __METHOD__);
+      Controller::systemError(__METHOD__, $e->getMessage());
       return false;
     }
   }

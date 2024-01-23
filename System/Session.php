@@ -49,12 +49,12 @@ class Session
       }
     } catch (\Error $e) {
       Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
-      Controller::systemError($e->getMessage(), __METHOD__);
+      Controller::systemError(__METHOD__, $e->getMessage());
     }
 
     if($regenSessionId) {
       if(!is_null($forcedSessionId)) {
-        Controller::systemError('Invalid operation!', __METHOD__);
+        Controller::systemError(__METHOD__, 'Invalid operation!');
       }
 
       session_regenerate_id();
@@ -131,7 +131,7 @@ class Session
         setcookie('auth', $token, $expiresAtCookie, '/', constant('URL_ROOT'), constant('HTTPS_ENABLED'), true);
       } catch (\Error $e) {
         Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
-        Controller::systemError($e->getMessage(), __METHOD__);
+        Controller::systemError(__METHOD__, $e->getMessage());
       }
       return true;
     } else {
@@ -241,7 +241,7 @@ class Session
       setcookie($name, '', time()-86401, "/", constant('URL_ROOT'), constant('HTTPS_ENABLED'), false);
     } catch (\Error $e) {
       Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
-      Controller::systemError($e->getMessage(), __METHOD__);
+      Controller::systemError(__METHOD__, $e->getMessage());
     }
   }
 

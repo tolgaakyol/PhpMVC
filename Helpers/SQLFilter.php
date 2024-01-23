@@ -87,7 +87,7 @@ class SQLFilter {
     private function createConditionalStatement($condition, $column, $operator, $value): void {
         if (count(array_keys($this->currentPairs)) >= 10)
         {
-          Controller::systemError('Maximum number of conditions reached.', __METHOD__);
+          Controller::systemError(__METHOD__, 'Maximum number of conditions reached.');
         }
 
         switch($condition)
@@ -102,7 +102,7 @@ class SQLFilter {
                 $this->currentStmt .= " AND NOT $column";
                 break;
             default:
-              Controller::systemError('Invalid operation.', __METHOD__);
+              Controller::systemError(__METHOD__, 'Invalid operation.');
         }
 
         $column = $this->avoidDuplicateColumns($column);
@@ -122,11 +122,11 @@ class SQLFilter {
             case '<=':
             case '<>':
             case 'LIKE':
-                if (is_array($value) && count($value) > 1) { Controller::systemError('Only one value must be provided inside the where clause for a single condition.', __METHOD__); }
+                if (is_array($value) && count($value) > 1) { Controller::systemError(__METHOD__, 'Only one value must be provided inside the where clause for a single condition.'); }
                 $this->currentStmt .= " $operator " . $value;
                 break;
             case 'BETWEEN':
-                if (!is_array($value) || count($value) != 2) { Controller::systemError("In order to use the BETWEEN operator, 2 values must be provided as an array.", __METHOD__); }
+                if (!is_array($value) || count($value) != 2) { Controller::systemError(__METHOD__, "In order to use the BETWEEN operator, 2 values must be provided as an array."); }
                 $this->currentStmt .= ' BETWEEN ' . $value[0] . ' AND ' . $value[1];
                 break;
             case 'IN':

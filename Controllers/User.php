@@ -6,9 +6,7 @@ use DateInterval;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
-use TolgaAkyol\PhpMVC\{Helpers\Generator,
-    Helpers\InputFilter
-};
+use TolgaAkyol\PhpMVC\{Helpers\ErrorType, Helpers\Generator, Helpers\InputFilter};
 use TolgaAkyol\PhpMVC\System\{Controller, Session, Log, LogType};
 use TolgaAkyol\PhpMVC\Config\TokenUseCase;
 use TolgaAkyol\PhpMVC\Models\User as Model;
@@ -25,7 +23,7 @@ class User extends Controller
       $this->coreViews = constant('USE_CORE_VIEWS');
     } catch (\Error $e) {
       Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
-      Controller::systemError($e->getMessage(), __METHOD__);
+      Controller::systemError(__METHOD__, $e->getMessage());
     }
 
     $this->model = $this->model('User', true);
@@ -81,7 +79,7 @@ class User extends Controller
         $result = $this->model->login([$login, $password]);
 
         if (!$result) {
-          die("Wrong credentials"); // ERRMSG
+          Controller::customError(ErrorType::UserWrongCredentials, __METHOD__);
         }
 
         Session::createUserSession($result['user_id']);
@@ -96,7 +94,7 @@ class User extends Controller
         if(str_contains($e->getMessage(), 'Undefined constant')) {
           Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
         }
-        Controller::systemError($e->getMessage(), __METHOD__);
+        Controller::systemError(__METHOD__, $e->getMessage());
       }
     } else {
       $this->view("User/Login", null, $this->coreViews);
@@ -149,11 +147,11 @@ class User extends Controller
         }
 
         if ($this->model->checkIfExists("email", $email)) {
-          die("A user with this e-mail address is already registered!"); // ERRMSG
+          Controller::customError(ErrorType::UserEmailExists, __METHOD__);
         }
 
         if ($this->model->checkIfExists("username", $username)) {
-          die("Username already exists"); // ERRMSG
+          Controller::customError(ErrorType::UserNameExists, __METHOD__);
         }
 
         $userId = uniqid("u.", true);
@@ -167,13 +165,13 @@ class User extends Controller
         $result = $this->model->create([$userId, $username, $password, $email, DEFAULT_USER_LEVEL]);
 
         if(!$result) {
-          die("Error while creating the user!"); // ERRMSG
+          Controller::systemError(__METHOD__, "Error while creating the user!");
         }
 
         if(constant('REQUIRE_EMAIL_ACTIVATION')) {
           $this->generateToken($userId, TokenUseCase::Activation->value, '7D');
 
-          die("Unable to send verification email! Please contact support."); // ERRMSG
+          Controller::systemError(__METHOD__, 'Unable to send verification email');
         }
 
         print('User was created successfully!'); // TODO: Complete user creation
@@ -181,15 +179,16 @@ class User extends Controller
         if(str_contains($e->getMessage(), 'Undefined constant')) {
           Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
         }
-        die('Unable to proceed due to system error.'); // ERRMSG
+
+        Controller::systemError(__METHOD__, 'Unable to create user');
       }
     } else {
       $this->view("User/Create", null, $this->coreViews);
     }
   }
 
-  public function profile(): void
-  { // TEST
+  public function profile(): void {
+    // TEST
     if (!Session::checkIfAuthorized()) {
       $this->logout();
     }
@@ -213,7 +212,7 @@ class User extends Controller
 
     $result = $this->model->activateUser($validToken['user_id']);
 
-    if(!$result) { die('Unable to activate user!'); }
+    if(!$result) { Controller::systemError(__METHOD__, 'Unable to activate user'); }
 
     print('User has been activated successfully!');
   }
@@ -233,7 +232,7 @@ class User extends Controller
 
       $email = $filter->getValues()['email'];
 
-      if(!$this->model->checkIfExists('email', $email)) { die('E-mail address not found!'); } // ERRMSG
+      if(!$this->model->checkIfExists('email', $email)) { Controller::customError(ErrorType::UserEmailNotFound, __METHOD__); }
 
       $userId = $this->model->getUserIdByKey('email', $email);
 
@@ -242,14 +241,14 @@ class User extends Controller
         // TODO: Send an email that includes the link: "domain.com/user/recover/update/$token"
         print('Password recovery link has been sent to your e-mail address: ' . $token);
       } else {
-        die('Unable to process the request.'); // ERRMSG
+        Controller::systemError(__METHOD__, 'Unable to generate recovery token for a user, despite the given e-mail address was found to exist in the database');
       }
     } else if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($token)) {
       try {
         $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
         $user = $this->model->getUserByKey('user_id', $validToken['user_id']);
 
-        if(!$user) { die('Unable to retrieve user information from the server!'); } // ERRMSG
+        if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__); }
 
         $filter = new InputFilter();
         $filter ->post('password')
@@ -283,7 +282,7 @@ class User extends Controller
       $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
       $user = $this->model->getUserByKey('user_id', $validToken['user_id']);
 
-      if(!$user) { die('Unable to retrieve user information from the server!'); } // ERRMSG
+      if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__); }
 
       $this->view('User/NewPassword', ['email' => $user['email']], $this->coreViews);
     } else {
@@ -292,24 +291,24 @@ class User extends Controller
   }
 
   private function validateToken(string $token, int $useCase, int $length = 0) {
-    if(empty($token)) { die('You must provide a token'); } // ERRMSG
-    if($length > 0 && strlen($token) != $length) { die('Invalid token!'); } // ERRMSG
+    if(empty($token)) { Controller::customError(ErrorType::UserEmptyToken, __METHOD__); }
+    if($length > 0 && strlen($token) != $length) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__); }
 
     $token = $this->model->getToken($token, $useCase);
 
-    if(!$token) { die('Invalid token!'); } // ERRMSG
+    if(!$token) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__); }
 
     try {
       $now = new DateTime('now', new DateTimeZone('Europe/Istanbul'));
       $now = $now->format('YmdHis');
     } catch (\Exception $e) {
       Log::toFile(LogType::Error, __METHOD__, 'Unable to capture current timestamp: ' . $e->getMessage());
-      die('Unable to validate token!'); // ERRMSG
+      Controller::systemError(__METHOD__, 'Unable to validate token');
     }
 
     if((int) $now > (int) $token['expires_at']) {
       $this->model->destroyToken($token['token']);
-      die('Token expired!'); // ERRMSG
+      Controller::customError(ErrorType::UserExpiredToken, __METHOD__);
     }
     return $token;
   }
@@ -320,10 +319,10 @@ class User extends Controller
    * @param int $useCase Pass in a TokenUseCase->value (activation & reset password etc.).
    * @param string $lifespan (optional) Pass in the desired lifespan of the token as 1D (for 1 day), 2M (for 2 months) etc. Default lifespan is 1 day.
    * @param bool $returnToken (optional) While true, the function will return the generated token as a string if the operation is successful.
-   * @return bool|string|Error
+   * @return bool|string
    *
    */
-  private function generateToken(string $userId, int $useCase, string $lifespan = '1D', bool $returnToken = false): bool|string|Error
+  private function generateToken(string $userId, int $useCase, string $lifespan = '1D', bool $returnToken = false): bool|string
   {
     $this->model->avoidDuplicateToken($userId, $useCase);
 

@@ -18,7 +18,7 @@ class Bootstrap
       $this->method = constant('INDEX_METHOD');
     } catch (Exception $e) {
       Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined. ' . $e->getMessage());
-      Controller::systemError($e->getMessage(), __METHOD__);
+      Controller::systemError(__METHOD__, $e->getMessage());
     }
 
     $this->parseURL();

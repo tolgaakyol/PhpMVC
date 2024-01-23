@@ -4,6 +4,8 @@ namespace TolgaAkyol\PhpMVC\System;
 
 use Exception;
 use TolgaAkyol\PhpMVC\Application;
+use TolgaAkyol\PhpMVC\Helpers\ErrorType;
+use TolgaAkyol\PhpMVC\Helpers\ErrorUnit;
 
 class Controller
 {
@@ -24,8 +26,8 @@ class Controller
       }
     } catch (Exception $e) {
       Log::toFile(LogType::Critical, __METHOD__, 'Unable to load model: ' . $e->getMessage());
-      Controller::systemError($e->getMessage(), __METHOD__);
-      die();
+      Controller::systemError(__METHOD__, $e->getMessage());
+      die;
     }
   }
 
@@ -50,12 +52,10 @@ class Controller
     }
   }
 
-  public static function displayError($page = null, $arguments = [], $httpResponseCode = null): void {
-    if(is_null($page)) {
+  public static function displayError($view = null, $arguments = [], $httpResponseCode = null): void {
+    if(is_null($view)) {
       $view = 'Error/404';
       http_response_code(404);
-    } else {
-      $view = $page;
     }
 
     if(!is_null($httpResponseCode)) {
@@ -63,10 +63,10 @@ class Controller
     }
 
     self::view($view, $arguments, constant('USE_CORE_VIEWS'));
-    die();
+    die;
   }
 
-  public static function systemError($message = '', $method = ''): void {
+  public static function systemError($method, $message = ''): void {
     if(Application::$frameworkDevMode) {
       $messageToDisplay = $method . ' >> ' . $message;
     } else {
@@ -74,10 +74,27 @@ class Controller
     }
 
     self::displayError('Error/System', [
-        'pageTitle' => 'System error',
-        'caption' => 'System error',
         'message' => $messageToDisplay
     ], 500);
+  }
+
+  public static function customError(ErrorType $type, $method, $view = null, $extraArguments = []): void {
+    $error = new ErrorUnit($type);
+
+    $view = is_null($view) ? $error->targetView : $view;
+
+    $arguments = [
+      'message' => Application::$frameworkDevMode ? $method . ' >> ' . $error->message : $error->message,
+      'caption' => $error->caption,
+      'redirectURL' => $error->redirectURL,
+      'redirectLabel' => $error->redirectLabel,
+    ];
+
+    foreach ($extraArguments as $arg) {
+      $arguments[] = $arg;
+    }
+
+    self::displayError($view, $arguments, $error->httpResponseCode);
   }
 
   public function getScript($script): string {

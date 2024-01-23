@@ -37,10 +37,10 @@ class Database extends PDO
       parent::__construct($dsn, $username, $password, $options);
     } catch (PDOException $e) {
       Log::toFile(LogType::Critical, __METHOD__, 'DB connection failed: ' . $e->getMessage());
-      Controller::systemError('DB connection failed: ' . $e->getMessage(), __METHOD__);
+      Controller::systemError(__METHOD__, 'DB connection failed: ' . $e->getMessage());
     } catch (Exception $e) {
       Log::toFile(LogType::Critical, __METHOD__, 'Constant not defined: ' . $e->getMessage());
-      Controller::systemError('Constant not defined: ' . $e->getMessage(), __METHOD__);
+      Controller::systemError(__METHOD__, 'Constant not defined: ' . $e->getMessage());
     }
   }
 
@@ -49,7 +49,7 @@ class Database extends PDO
     try {
       $this->stmt = $this->prepare($sql);
     } catch (PDOException $e) {
-      Controller::systemError('Could not successfully prepare the SQL stmt: ' . $e->getMessage(), __METHOD__);
+      Controller::systemError(__METHOD__, 'Could not successfully prepare the SQL stmt: ' . $e->getMessage());
     }
   }
 
@@ -57,7 +57,7 @@ class Database extends PDO
   protected function bind($key, $value, $type = null): void
   {
     if (!isset($this->stmt)) {
-      Controller::systemError('SQL statement not defined.', __METHOD__);
+      Controller::systemError(__METHOD__, 'SQL statement not defined.');
     }
 
     if (is_null($type)) {

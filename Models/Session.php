@@ -50,7 +50,7 @@ class Session extends Model {
         $key = 'secret';
         break;
       default:
-        Controller::systemError('Incorrect arguments.', __METHOD__);
+        Controller::systemError(__METHOD__, 'Incorrect arguments.');
     }
 
     $where = new SQLFilter($key, "=", $value);

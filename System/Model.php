@@ -43,9 +43,9 @@ class Model extends Database
         $join               = '';
 
         // Protection against empty & incorrect arguments
-        if (empty($table)) { Controller::systemError('Must declare at least one table name.', __METHOD__); }
-        if (empty($columns)) { Controller::systemError('Must declare the columns to select!', __METHOD__); }
-        if (!is_null($joins) && !is_array($joins)) { Controller::systemError("'Join' must be an array in the following format: " . "array(array('table_name', 'join_type', 'join_condition'), array('table_name', 'join_type', 'join_condition'), ...)", __METHOD__); }
+        if (empty($table)) { Controller::systemError(__METHOD__, 'Must declare at least one table name.'); }
+        if (empty($columns)) { Controller::systemError(__METHOD__, 'Must declare the columns to select!'); }
+        if (!is_null($joins) && !is_array($joins)) { Controller::systemError(__METHOD__, "'Join' must be an array in the following format: " . "array(array('table_name', 'join_type', 'join_condition'), array('table_name', 'join_type', 'join_condition'), ...)"); }
 
         // Set columns
         if (is_array($columns))
@@ -79,7 +79,7 @@ class Model extends Database
         // Check if conditions are passed but values are not
         if (!empty($where) && empty($values))
         {
-            Controller::systemError('Values cannot be empty when conditions are set.', __METHOD__);
+            Controller::systemError(__METHOD__, 'Values cannot be empty when conditions are set.');
         }
 
         // If there are any values passed, bind them to their keys
