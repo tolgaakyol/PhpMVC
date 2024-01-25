@@ -2,6 +2,9 @@
 
 namespace TolgaAkyol\PhpMVC\Helpers;
 
+use TolgaAkyol\PhpMVC\Application;
+use TolgaAkyol\PhpMVC\System\FileHandler;
+
 class ErrorUnit {
   public string $caption;
   public string $message;
@@ -21,14 +24,31 @@ class ErrorUnit {
   }
 
   public function getInfoForErrorType(ErrorType $errorType): array {
-    // TODO: Read the json or txt file that includes text for the given error type and set the properties of the ErrorUnit object accordingly
+    $prefix = constant('USE_CORE_VIEWS') ? Application::$PATH_CORE : Application::$PATH_EXT;
+    $path = $prefix . constant('DIR_VIEWS') . 'Error/';
+    $fileHandler = new FileHandler($path);
+    $errorList = $fileHandler->getJSONFileAsArray('errors.json');
+
+    foreach ($errorList as $error) {
+      if ($error['id'] === $errorType->value) {
+        return [
+            'caption' => $error['caption'],
+            'message' => $error['message'],
+            'targetView' => $error['targetView'],
+            'redirectURL' => $error['redirectURL'],
+            'redirectLabel' => $error['redirectLabel'],
+            'httpResponseCode' => $error['httpResponseCode'],
+        ];
+      }
+    }
+
     return [
-      'caption' => 'Error',
-      'message' => 'An error occurred.',
-      'targetView' => 'create',
-      'redirectURL' => '/',
-      'redirectLabel' => 'Go to Home Page',
-      'httpResponseCode' => 400,
+        'caption' => 'Unknown error',
+        'message' => 'An unknown error has occurred.',
+        'targetView' => false,
+        'redirectURL' => false,
+        'redirectLabel' => false,
+        'httpResponseCode' => 500,
     ];
   }
 }

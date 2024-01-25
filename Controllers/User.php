@@ -180,7 +180,7 @@ class User extends Controller
           Log::toFile(LogType::Critical, __METHOD__, $e->getMessage());
         }
 
-        Controller::systemError(__METHOD__, 'Unable to create user');
+        Controller::systemError(__METHOD__, 'Unable to create user: ' . $e->getMessage());
       }
     } else {
       $this->view("User/Create", null, $this->coreViews);

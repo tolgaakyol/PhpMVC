@@ -72,6 +72,17 @@ class FileHandler
     }
   }
 
+  public function getJSONFileAsArray($fileName): array {
+    $filePath = $this->basePath . $fileName;
+
+    if (file_exists($filePath) && $this->getFileFormat($fileName) === 'application/json') {
+      $json = file_get_contents($filePath);
+      return json_decode($json, true);
+    } else {
+      $this->handleFileError($filePath);
+    }
+  }
+
   #[NoReturn]
   private function handleFileError($filePath): void {
     Log::toFile(LogType::Info, __METHOD__, 'Error accessing file: ' . $filePath);
