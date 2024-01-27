@@ -48,15 +48,15 @@ class User extends Controller
 
       try {
         $filter ->post(constant('LOGIN_WITH'))
-                ->required()
+            ->required()
 
-                ->post('password')
-                ->required()
+            ->post('password')
+            ->required()
 
-                ->post('remember')
-                ->length(0,1)
+            ->post('remember')
+            ->length(0,1)
 
-                ->post('g-recaptcha-response');
+            ->post('g-recaptcha-response');
 
         if($filter->getErrors()) {
           $this->view('User/Login', ['errors' => $filter->getErrors()], $this->coreViews);
@@ -71,7 +71,7 @@ class User extends Controller
         if(constant('USE_RECAPTCHA')) {
           $recaptcha = $this->recaptcha($filter->getValues()['g-recaptcha-response'], 'login');
           if(!$recaptcha) {
-            $this->view('User/Create', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.'], $this->coreViews);
+            Controller::customError(ErrorType::UserFailedRecaptcha, __METHOD__, 'User/Login', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.']);
             return;
           }
         }
@@ -112,24 +112,24 @@ class User extends Controller
       try {
         $filter = new InputFilter();
         $filter ->post('username')
-                ->required()
-                ->lettersOnly()
-                ->length(constant('USERNAME_LENGTH_MIN'), constant('USERNAME_LENGTH_MAX'))
+            ->required()
+            ->lettersOnly()
+            ->length(constant('USERNAME_LENGTH_MIN'), constant('USERNAME_LENGTH_MAX'))
 
-                ->post('email')
-                ->required()
-                ->email()
+            ->post('email')
+            ->required()
+            ->email()
 
-                ->post('password')
-                ->required()
-                ->alphanumeric()
-                ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
+            ->post('password')
+            ->required()
+            ->alphanumeric()
+            ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
 
-                ->post('password_confirm')
-                ->required()
-                ->equalTo('password')
+            ->post('password_confirm')
+            ->required()
+            ->equalTo('password')
 
-                ->post('g-recaptcha-response');
+            ->post('g-recaptcha-response');
 
         if($filter->getErrors()) {
           $this->view('User/Create', ['errors' => $filter->getErrors()], $this->coreViews);
@@ -142,7 +142,7 @@ class User extends Controller
 
         $recaptcha = $this->recaptcha($filter->getValues()['g-recaptcha-response'], 'create');
         if(!$recaptcha) {
-          $this->view('User/Create', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.'], $this->coreViews);
+          Controller::customError(ErrorType::UserFailedRecaptcha, __METHOD__, 'User/Create', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.']);
           return;
         }
 
@@ -209,6 +209,9 @@ class User extends Controller
   /** @noinspection PhpUnused */
   public function activate($token = ''): void {
     $validToken = $this->validateToken($token, TokenUseCase::Activation->value, 50);
+    if($validToken instanceof ErrorType) {
+      Controller::customError($validToken, __METHOD__);
+    }
 
     $result = $this->model->activateUser($validToken['user_id']);
 
@@ -222,8 +225,8 @@ class User extends Controller
     if($_SERVER['REQUEST_METHOD'] == 'POST' && empty($token)) {
       $filter = new InputFilter();
       $filter ->post('email')
-              ->required()
-              ->email();
+          ->required()
+          ->email();
 
       if($filter->getErrors()) {
         $this->view('User/RequestRecovery', ['errors' => $filter->getErrors()], $this->coreViews);
@@ -232,7 +235,7 @@ class User extends Controller
 
       $email = $filter->getValues()['email'];
 
-      if(!$this->model->checkIfExists('email', $email)) { Controller::customError(ErrorType::UserEmailNotFound, __METHOD__); }
+      if(!$this->model->checkIfExists('email', $email)) { Controller::customError(ErrorType::UserEmailNotFound, __METHOD__, 'User/RequestRecovery'); }
 
       $userId = $this->model->getUserIdByKey('email', $email);
 
@@ -246,19 +249,22 @@ class User extends Controller
     } else if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($token)) {
       try {
         $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
+        if($validToken instanceof ErrorType) {
+          Controller::customError($validToken, __METHOD__, 'User/RequestRecovery');
+        }
         $user = $this->model->getUserByKey('user_id', $validToken['user_id']);
 
-        if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__); }
+        if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__, 'User/RequestRecovery'); }
 
         $filter = new InputFilter();
         $filter ->post('password')
-                ->required()
-                ->alphanumeric()
-                ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
+            ->required()
+            ->alphanumeric()
+            ->length(constant('PASSWORD_LENGTH_MIN'), constant('PASSWORD_LENGTH_MAX'))
 
-                ->post('password_confirm')
-                ->required()
-                ->equalTo('password');
+            ->post('password_confirm')
+            ->required()
+            ->equalTo('password');
 
         if($filter->getErrors()) {
           $this->view('User/NewPassword', ['email' => $user['email'], 'errors' => $filter->getErrors()], $this->coreViews);
@@ -280,9 +286,12 @@ class User extends Controller
       }
     } else if (!empty($token)) {
       $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
+      if($validToken instanceof ErrorType) {
+        Controller::customError($validToken, __METHOD__, 'User/RequestRecovery');
+      }
       $user = $this->model->getUserByKey('user_id', $validToken['user_id']);
 
-      if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__); }
+      if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__, 'User/RequestRecovery'); }
 
       $this->view('User/NewPassword', ['email' => $user['email']], $this->coreViews);
     } else {
@@ -290,13 +299,13 @@ class User extends Controller
     }
   }
 
-  private function validateToken(string $token, int $useCase, int $length = 0) {
-    if(empty($token)) { Controller::customError(ErrorType::UserEmptyToken, __METHOD__); }
-    if($length > 0 && strlen($token) != $length) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__); }
+  private function validateToken(string $token, int $useCase, int $length = 0): array|ErrorType {
+    if(empty($token)) { return ErrorType::UserEmptyToken; }
+    if($length > 0 && strlen($token) != $length) { return ErrorType::UserInvalidToken; }
 
-    $token = $this->model->getToken($token, $useCase);
+    $resolvedToken = $this->model->getToken($token, $useCase);
 
-    if(!$token) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__); }
+    if(!$resolvedToken) { return ErrorType::UserInvalidToken; }
 
     try {
       $now = new DateTime('now', new DateTimeZone('Europe/Istanbul'));
@@ -306,11 +315,12 @@ class User extends Controller
       Controller::systemError(__METHOD__, 'Unable to validate token');
     }
 
-    if((int) $now > (int) $token['expires_at']) {
-      $this->model->destroyToken($token['token']);
-      Controller::customError(ErrorType::UserExpiredToken, __METHOD__);
+    if((int) $now > (int) $resolvedToken['expires_at']) {
+      $this->model->destroyToken($resolvedToken['token']);
+      return ErrorType::UserExpiredToken;
     }
-    return $token;
+
+    return $resolvedToken;
   }
 
   /**
@@ -340,10 +350,10 @@ class User extends Controller
     }
 
     $content = array(
-      'user_id' => $userId,
-      'token' => $token,
-      'expires_at' => $expiresAt,
-      'use_case' => $useCase
+        'user_id' => $userId,
+        'token' => $token,
+        'expires_at' => $expiresAt,
+        'use_case' => $useCase
     );
 
     $result = $this->model->storeToken($content);
