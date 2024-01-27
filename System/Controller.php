@@ -90,8 +90,8 @@ class Controller
       'redirectLabel' => $error->redirectLabel,
     ];
 
-    foreach ($extraArguments as $arg) {
-      $arguments[] = $arg;
+    foreach ($extraArguments as $key => $value) {
+      $arguments[$key] = $value;
     }
 
     self::displayError($view, $arguments, $error->httpResponseCode);

@@ -71,7 +71,7 @@ class User extends Controller
         if(constant('USE_RECAPTCHA')) {
           $recaptcha = $this->recaptcha($filter->getValues()['g-recaptcha-response'], 'login');
           if(!$recaptcha) {
-            Controller::customError(ErrorType::UserFailedRecaptcha, __METHOD__, 'User/Login', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.']);
+            Controller::customError(ErrorType::UserFailedRecaptcha, __METHOD__, 'User/Login', ['alert' => true]);
             return;
           }
         }
@@ -79,7 +79,7 @@ class User extends Controller
         $result = $this->model->login([$login, $password]);
 
         if (!$result) {
-          Controller::customError(ErrorType::UserWrongCredentials, __METHOD__);
+          Controller::customError(ErrorType::UserWrongCredentials, __METHOD__, ['alert' => true]);
         }
 
         Session::createUserSession($result['user_id']);
@@ -142,16 +142,16 @@ class User extends Controller
 
         $recaptcha = $this->recaptcha($filter->getValues()['g-recaptcha-response'], 'create');
         if(!$recaptcha) {
-          Controller::customError(ErrorType::UserFailedRecaptcha, __METHOD__, 'User/Create', ['alert' => true, 'message' => 'Recaptcha has failed to validate that you are a human! Please try again.']);
+          Controller::customError(ErrorType::UserFailedRecaptcha, __METHOD__, 'User/Create', ['alert' => true]);
           return;
         }
 
         if ($this->model->checkIfExists("email", $email)) {
-          Controller::customError(ErrorType::UserEmailExists, __METHOD__);
+          Controller::customError(ErrorType::UserEmailExists, __METHOD__, ['alert' => true]);
         }
 
         if ($this->model->checkIfExists("username", $username)) {
-          Controller::customError(ErrorType::UserNameExists, __METHOD__);
+          Controller::customError(ErrorType::UserNameExists, __METHOD__, ['alert' => true]);
         }
 
         $userId = uniqid("u.", true);
@@ -210,7 +210,7 @@ class User extends Controller
   public function activate($token = ''): void {
     $validToken = $this->validateToken($token, TokenUseCase::Activation->value, 50);
     if($validToken instanceof ErrorType) {
-      Controller::customError($validToken, __METHOD__);
+      Controller::customError($validToken, __METHOD__, ['alert' => true]);
     }
 
     $result = $this->model->activateUser($validToken['user_id']);
@@ -235,7 +235,7 @@ class User extends Controller
 
       $email = $filter->getValues()['email'];
 
-      if(!$this->model->checkIfExists('email', $email)) { Controller::customError(ErrorType::UserEmailNotFound, __METHOD__, 'User/RequestRecovery'); }
+      if(!$this->model->checkIfExists('email', $email)) { Controller::customError(ErrorType::UserEmailNotFound, __METHOD__, 'User/RequestRecovery', ['alert' => true]); }
 
       $userId = $this->model->getUserIdByKey('email', $email);
 
@@ -250,11 +250,11 @@ class User extends Controller
       try {
         $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
         if($validToken instanceof ErrorType) {
-          Controller::customError($validToken, __METHOD__, 'User/RequestRecovery');
+          Controller::customError($validToken, __METHOD__, 'User/RequestRecovery', ['alert' => true]);
         }
         $user = $this->model->getUserByKey('user_id', $validToken['user_id']);
 
-        if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__, 'User/RequestRecovery'); }
+        if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__, 'User/RequestRecovery', ['alert' => true]); }
 
         $filter = new InputFilter();
         $filter ->post('password')
@@ -287,11 +287,11 @@ class User extends Controller
     } else if (!empty($token)) {
       $validToken = $this->validateToken($token, TokenUseCase::ResetPassword->value, 50);
       if($validToken instanceof ErrorType) {
-        Controller::customError($validToken, __METHOD__, 'User/RequestRecovery');
+        Controller::customError($validToken, __METHOD__, 'User/RequestRecovery', ['alert' => true]);
       }
       $user = $this->model->getUserByKey('user_id', $validToken['user_id']);
 
-      if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__, 'User/RequestRecovery'); }
+      if(!$user) { Controller::customError(ErrorType::UserInvalidToken, __METHOD__, 'User/RequestRecovery', ['alert' => true]); }
 
       $this->view('User/NewPassword', ['email' => $user['email']], $this->coreViews);
     } else {
