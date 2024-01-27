@@ -107,7 +107,7 @@ class User extends Model
     return $this->insert('tokens', $content);
   }
 
-  public function getToken($token, $useCase) {
+  public function getToken($token, $useCase): false|array {
     $where = new SQLFilter('token', '=', $token);
     $where->and('use_case', '=', $useCase);
 
