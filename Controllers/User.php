@@ -79,7 +79,7 @@ class User extends Controller
         $result = $this->model->login([$login, $password]);
 
         if (!$result) {
-          Controller::customError(ErrorType::UserWrongCredentials, __METHOD__, ['alert' => true]);
+          Controller::customError(ErrorType::UserWrongCredentials, __METHOD__, null, ['alert' => true]);
         }
 
         Session::createUserSession($result['user_id']);
@@ -147,11 +147,11 @@ class User extends Controller
         }
 
         if ($this->model->checkIfExists("email", $email)) {
-          Controller::customError(ErrorType::UserEmailExists, __METHOD__, ['alert' => true]);
+          Controller::customError(ErrorType::UserEmailExists, __METHOD__, null, ['alert' => true]);
         }
 
         if ($this->model->checkIfExists("username", $username)) {
-          Controller::customError(ErrorType::UserNameExists, __METHOD__, ['alert' => true]);
+          Controller::customError(ErrorType::UserNameExists, __METHOD__, null, ['alert' => true]);
         }
 
         $userId = uniqid("u.", true);
@@ -210,7 +210,7 @@ class User extends Controller
   public function activate($token = ''): void {
     $validToken = $this->validateToken($token, TokenUseCase::Activation->value, 50);
     if($validToken instanceof ErrorType) {
-      Controller::customError($validToken, __METHOD__, ['alert' => true]);
+      Controller::customError($validToken, __METHOD__, null, ['alert' => true]);
     }
 
     $result = $this->model->activateUser($validToken['user_id']);
